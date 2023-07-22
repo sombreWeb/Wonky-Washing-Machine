@@ -2,20 +2,19 @@
 
 void setup() {
   Serial.begin(9600);
-  randomSeed(analogRead(A7));
- 
   SPI.begin();
   
+  randomSeed(analogRead(A0));
+ 
   setupActivation();
   setupKnobs();
   setupPatternGame();
   
-  runActivation();
-  runKnobs();
+  //runActivation();
+  //runKnobs();
   runPatternGame();
 
   Serial.print("done");
-
 }
 
 void loop() {}

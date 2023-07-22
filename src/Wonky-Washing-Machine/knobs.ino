@@ -1,6 +1,6 @@
-#define POT_PIN_1 A0
-#define POT_PIN_2 A1
-#define POT_PIN_3 A2
+#define POT_PIN_1 A2
+#define POT_PIN_2 A3
+#define POT_PIN_3 A4
 
 /**
  * @brief Flag indicating whether the knobs process is complete.
@@ -13,6 +13,10 @@ bool knobs_complete = false;
 int desired_knob1 = 1;
 int desired_knob2 = 1;
 int desired_knob3 = 6;
+
+void setupKnobs(){
+    
+  }
 
 /**
  * @brief Runs the knobs process.
@@ -30,6 +34,7 @@ void runKnobs() {
     int pot_value2 = mapPotToNumber(analogRead(POT_PIN_2));
     int pot_value3 = mapPotToNumber(analogRead(POT_PIN_3));
 
+    Serial.println("-------------");
     Serial.print("PotValue1: ");
     Serial.println(pot_value1);
 
