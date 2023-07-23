@@ -9,7 +9,7 @@
 #define BUTTON_PIN_BLUE 10
 #define BUTTON_PIN_YELLOW 11
 
-int level = 1;
+int level = 3;
 
 /**
    Flag to track the completion of the pattern game.
