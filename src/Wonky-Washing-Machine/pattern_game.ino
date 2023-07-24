@@ -1,15 +1,17 @@
-#include <FastLED.h>
-#include <Servo.h>
+#include <FastLED.h> // FastLED library for controlling LEDs
 
-#define LEDS_DATA_PIN 7
-#define NUM_LEDS 4
+#define LEDS_DATA_PIN 7      // Data pin for the LED strip
+#define NUM_LEDS 4           // Number of LEDs in the strip
 
-#define BUTTON_PIN_RED 8
-#define BUTTON_PIN_GREEN 9
-#define BUTTON_PIN_BLUE 10
-#define BUTTON_PIN_YELLOW 11
+#define BUTTON_PIN_RED 8     // Pin for the red button
+#define BUTTON_PIN_GREEN 9   // Pin for the green button
+#define BUTTON_PIN_BLUE 10   // Pin for the blue button
+#define BUTTON_PIN_YELLOW 11 // Pin for the yellow button
 
-int level = 3;
+/**
+   Level for the pattern game.
+*/
+int patternGameLevel = 3;
 
 /**
    Flag to track the completion of the pattern game.
@@ -47,19 +49,9 @@ const unsigned long YELLOW_HEX = 0xF6FF00;
 const unsigned long WHITE_HEX = 0xFFFFFF;
 
 /**
-   Time in miliseconds to wait for another button press
+   Time in miliseconds to wait for another button press.
 */
 const int BUTTON_PRESS_WAIT_TIME = 3000;
-
-/**
-   Array to store the random pattern.
-*/
-// int* randomPattern = generateRandomPatternTop(patternLength);
-
-/**
-   Array to store the button queue.
-*/
-// int buttonQueue[patternLength];
 
 /**
    Array to store the LED colours.
@@ -88,11 +80,11 @@ void setupPatternGame()
 */
 void setLEDTop(int ledNum, unsigned long colour)
 {
-  if (ledNum >= 0 && ledNum < NUM_LEDS)
+  if (ledNum >= 0 && ledNum < NUM_LEDS) // Check if the LED number is within the valid range
   {
-    fill_solid(leds, NUM_LEDS, CRGB::Black);
-    leds[ledNum] = colour;
-    FastLED.show();
+    fill_solid(leds, NUM_LEDS, CRGB::Black); // Turn off all LEDs
+    leds[ledNum] = colour; // Set the specified LED to the specified colour
+    FastLED.show(); // Update the LED strip to show the changes
   }
 }
 
@@ -103,21 +95,21 @@ void fillLights(String colour)
 {
   if (colour == "white")
   {
-    fill_solid(leds, NUM_LEDS, CRGB::White);
+    fill_solid(leds, NUM_LEDS, CRGB::White); // Set all LEDs to white
   }
   else if (colour == "black")
   {
-    fill_solid(leds, NUM_LEDS, CRGB::Black);
+    fill_solid(leds, NUM_LEDS, CRGB::Black); // Set all LEDs to black (off)
   }
   else if (colour == "green")
   {
-    fill_solid(leds, NUM_LEDS, CRGB::Green);
+    fill_solid(leds, NUM_LEDS, CRGB::Green); // Set all LEDs to green
   }
   else
   {
-    fill_solid(leds, NUM_LEDS, CRGB::Black);
+    fill_solid(leds, NUM_LEDS, CRGB::Black); // Default: Set all LEDs to black (off)
   }
-  FastLED.show();
+  FastLED.show(); // Update the LED strip to show the changes
 }
 
 /**
@@ -130,19 +122,19 @@ int checkButtonPressed()
 
   if (digitalRead(BUTTON_PIN_RED) == HIGH)
   {
-    return 0;
+    return 0; // Red button pressed
   }
   else if (digitalRead(BUTTON_PIN_GREEN) == HIGH)
   {
-    return 1;
+    return 1; // Green button pressed
   }
   else if (digitalRead(BUTTON_PIN_BLUE) == HIGH)
   {
-    return 2;
+    return 2; // Blue button pressed
   }
   else if (digitalRead(BUTTON_PIN_YELLOW) == HIGH)
   {
-    return 3;
+    return 3; // Yellow button pressed
   }
   return -1; // No button pressed
 }
@@ -155,28 +147,9 @@ int checkButtonPressed()
 void updateButtonQueue(int buttonQueue[], int buttonQueueLength)
 {
   int latest = checkButtonPressed();
-  if (latest >= 0 && latest != buttonQueue[buttonQueueLength - 1])
+  if (latest >= 0 && latest != buttonQueue[buttonQueueLength - 1]) // Check if a new button press is detected and it's different from the last button in the queue
   {
-    addToButtonSequence(buttonQueue, buttonQueueLength, latest);
-
-    switch (latest)
-    {
-      case 0:
-        Serial.println("Red");
-        break;
-      case 1:
-        Serial.println("Green");
-        break;
-      case 2:
-        Serial.println("Blue");
-        break;
-      case 3:
-        Serial.println("Yellow");
-        break;
-      default:
-        Serial.println("Invalid input");
-        break;
-    }
+    addToButtonSequence(buttonQueue, buttonQueueLength, latest); // Add the latest button press to the button sequence
   }
 }
 
@@ -188,19 +161,19 @@ void updateButtonQueue(int buttonQueue[], int buttonQueueLength)
 */
 int *generateRandomPatternTop(int patternLength)
 {
-  int *pattern = new int[patternLength];
-  int previousNumber = -1;
+  int *pattern = new int[patternLength]; // Array to store the random pattern
+  int previousNumber = -1; // Initialize the previous number to an invalid value
 
   for (int i = 0; i < patternLength; i++)
   {
     int randomNumber;
     do
     {
-      randomNumber = random(NUM_LEDS);
-    } while (randomNumber == previousNumber);
+      randomNumber = random(NUM_LEDS); // Generate a random number between 0 and NUM_LEDS-1
+    } while (randomNumber == previousNumber); // Ensure the current random number is different from the previous one
 
-    pattern[i] = randomNumber;
-    previousNumber = randomNumber;
+    pattern[i] = randomNumber; // Store the random number in the pattern array
+    previousNumber = randomNumber; // Update the previous number for the next iteration
   }
 
   return pattern;
@@ -210,16 +183,17 @@ int *generateRandomPatternTop(int patternLength)
    Function to add a value to the button sequence.
 
    @param buttonSequence The button sequence array.
+   @param buttonSequenceLength The length of the button array.
    @param value The value to add.
 */
 void addToButtonSequence(int buttonSequence[], int buttonSequenceLength, int value)
 {
   for (int i = 0; i < buttonSequenceLength - 1; i++)
   {
-    buttonSequence[i] = buttonSequence[i + 1];
+    buttonSequence[i] = buttonSequence[i + 1]; // Shift the elements in the button sequence array to the left
   }
 
-  buttonSequence[buttonSequenceLength - 1] = value;
+  buttonSequence[buttonSequenceLength - 1] = value; // Add the new value to the end of the button sequence
 }
 
 /**
@@ -227,18 +201,19 @@ void addToButtonSequence(int buttonSequence[], int buttonSequenceLength, int val
 
    @param array1 The first array.
    @param array2 The second array.
+   @param arrayLength The length of the arrays.
    @return True if the arrays are equal, false otherwise.
 */
 bool compareArrays(const int *array1, const int *array2, int arrayLength)
 {
   for (int i = 0; i < arrayLength; i++)
   {
-    if (array1[i] != array2[i])
+    if (array1[i] != array2[i]) // Compare each element of the arrays
     {
-      return false;
+      return false; // Arrays are not equal
     }
   }
-  return true;
+  return true; // Arrays are equal
 }
 
 /**
@@ -246,11 +221,10 @@ bool compareArrays(const int *array1, const int *array2, int arrayLength)
 */
 void runPatternGame()
 {
-
   // Set game level
   int patternLength, patternIncrement, patternSpeed;
 
-  switch (level)
+  switch (patternGameLevel)
   {
     case 1:
       patternLength = patternLengthLevel1;
@@ -273,72 +247,29 @@ void runPatternGame()
       patternSpeed = patternSpeedLevel1;
   }
 
-  Serial.print("patternLength: ");
-  Serial.println(patternLength);
-  Serial.print("patternIncrement: ");
-  Serial.println(patternIncrement);
-  Serial.print("patternSpeed: ");
-  Serial.println(patternSpeed);
-
   // Generate a random pattern
-  int* randomPattern = generateRandomPatternTop(patternLength);
+  int *randomPattern = generateRandomPatternTop(patternLength);
 
-  Serial.print("Random pattern::: ");
-  for (int i = 0; i < patternLength; i++) {
-    Serial.print(randomPattern[i]);
-    Serial.print(" ");
-  }
-  Serial.println();
-
-  Serial.print("randomPattern as colors: ");
-  for (int o = 0; o < patternLength; o++) {
-
-    switch (randomPattern[o]) {
-      case 0:
-        Serial.print("red ");
-        break;
-      case 1:
-        Serial.print("green ");
-        break;
-      case 2:
-        Serial.print("blue ");
-        break;
-      case 3:
-        Serial.print("yellow ");
-        break;
-      default:
-        Serial.print("purple ");
-        break;
-    }
-  }
-  Serial.println();
-
+  // Loop until the game is complete
   while (!patternGameComplete)
   {
-
-    bool arrayEqual = false; // Flag to check if the buttons pressed array is equal to the required pattern array
-
+    // Loop through the game in increments to give it the progressive completion effect
     for (int patternSegment = 2; patternSegment < (patternLength + patternIncrement); patternSegment += patternIncrement)
     {
 
-      bool segmentComplete = false;
+      bool segmentComplete = false; // Flag to check if this segment of the game is complete
 
+      // Loop over this segment repeatedly until the player completes the segment
       while (!segmentComplete)
       {
 
-        Serial.print("Pattern Segment: ");
-        Serial.println(patternSegment);
-
-        // Display the colours
-        for (int colourIndex = 0; colourIndex < (patternSegment + 1); colourIndex++)
+        // Display the colours to the player
+        for (int colourIndex = 0; colourIndex < (patternSegment + 1); colourIndex++) // Plus one for the white flash
         {
-          if (segmentComplete)
+          if (segmentComplete) // Stop looping if this segment is complete
           {
             break;
           }
-
-          Serial.print("Colour index: ");
-          Serial.println(colourIndex);
 
           // Set the colour
           unsigned long colour;
@@ -361,105 +292,80 @@ void runPatternGame()
               break;
           }
 
-          setLEDTop(randomPattern[colourIndex], colour);
+          setLEDTop(randomPattern[colourIndex], colour); // Display the colour on the LEDs
 
-          if (colourIndex == patternSegment ) {
+          if (colourIndex == patternSegment) // Do a white flash at the end of the pattern
+          {
             fillLights("white");
           }
 
+          // Loop to delay LED turning off. Allows continuous checking for a button press to interrupt lights flashing
           for (int lightDelayIncrement = 0; lightDelayIncrement < patternSpeed; lightDelayIncrement++)
           {
 
-            if (segmentComplete)
+            if (segmentComplete) // Stop looping if this segment is complete
             {
               break;
             }
 
+            // Create an array to store the sequence of pressed buttons. Initialise them all to -1
             int buttonsPressed[patternLength];
             for (int buttonIdx = 0; buttonIdx < patternLength; buttonIdx++)
             {
               buttonsPressed[buttonIdx] = -1;
             }
 
+            // Loop to check for a button press. This loop allows us to reset the timer between button presses on continue 
             while (true)
             {
 
               // check if button pressed
               if (checkButtonPressed() > -1)
               {
-                // add to queue
-                Serial.println("Added to queue.............................................................................");
+                // add to buttons pressed queue
                 updateButtonQueue(buttonsPressed, patternLength);
-                Serial.print("Array elements: ");
-                for (int y = 0; y < patternLength; y++)
-                {
-                  Serial.print(buttonsPressed[y]);
-                  Serial.print(" ");
-                }
-                Serial.println();
 
                 // turn off lights
                 fillLights("black");
 
+                // Loop to enter button pressed mode. Stop showing the player the pattern and wait until a set time for another press
                 for (int buttonDelayIncrement = 0; buttonDelayIncrement < BUTTON_PRESS_WAIT_TIME; buttonDelayIncrement++)
                 {
-                  if (segmentComplete)
+                  if (segmentComplete) // Stop looping if this segment is complete
                   {
                     break;
                   }
 
-                  if (checkButtonPressed() > -1)
+                  if (checkButtonPressed() > -1) // If a button is pressed start the timer again and wait for another
                   {
                     continue;
                   }
 
-
-
-
-                  if (compareArrays(&(buttonsPressed[patternLength - patternSegment]), randomPattern, patternSegment)) { // the subtraction here allows a dynamic start point for the buttons pressed which adds to the end of the queue
-                    Serial.println("********************");
+                  // Check if the segment pattern was completed successfully
+                  if (compareArrays(&(buttonsPressed[patternLength - patternSegment]), randomPattern, patternSegment))
+                  { // the subtraction here allows a dynamic start point for the buttons pressed array pointer which adds to the end of the queue
                     segmentComplete = true;
-                    delay(patternSpeed);
+                    delay(patternSpeed); // A delay to stop the next segment starting immediately 
                   }
-
-                  delay(1);
+                  
+                  delay(1); // Delay between button checks
                 }
-                Serial.println("moving on...");
               }
               else
               {
-                break;
+                break; // Break from button pressed mode if no button was pressed in the time limit 
               }
             }
 
-            delay(1);
+            delay(1); // Delay light display time
           }
         }
-        // wait for next button for a while
-        // if no button pressed continue
-        // if button not pressed continue
       }
     }
-    /*
-      for (int j = 0; j < 120; j++) {
-        delay(5);
-        updateButtonQueue(buttonQueue, patternLength);
-        arrayEqual = compareArrays(buttonQueue, randomPattern, patternLength);
-      }
-      }
 
-      if (arrayEqual) {
-      setLEDTop(0, CRGB::Green);
-      break;
-      }
-    */
-
-    // LEDTopWhiteFlash();
-
-    fillLights("green");
-    patternGameComplete = true;
+    fillLights("green"); // Fill LEDs to green when the pattern game was completed successfully
+    patternGameComplete = true; // End the game
   }
 
-
-  delete[] randomPattern;
+  delete[] randomPattern; // Release the memory allocated for the random pattern array
 }
