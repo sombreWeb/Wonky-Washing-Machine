@@ -9,10 +9,12 @@ void setup() {
   setupActivation();
   setupKnobs();
   setupPatternGame();
+  setupWireGame();
   
   //runActivation();
   //runKnobs();
-  runPatternGame();
+  //runPatternGame();
+  runWireGame();
 
   Serial.print("done");
 }
