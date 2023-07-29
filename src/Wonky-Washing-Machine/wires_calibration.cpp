@@ -9,11 +9,31 @@ float Vin = 5;
 float Rref = 20000;
 
 int homePort = 0;
-float redPortOffsets[numSensors] = { 0, -0.0334, -0.0255, -0.0196 };
+const float redPortOffsets[numSensors] = { 0, -0.0334, -0.0255, -0.0196 };
 
-int numberOfResistanceTests = 100;
+const int numberOfResistanceTests = 100;
 
-std::vector<wireConnection> allWireConnections;
+std::vector<wireConnection> allWireConnections =
+{
+  {4003.12f, 0, 'r', 3},
+  {7201.33f, 0, 'r', 2},
+  {8931.46f, 0, 'r', 1},
+  {12252.57f, 0, 'r', 0},
+  {33887.31f, 1, 'g', 3},
+  {37491.65f, 1, 'g', 2},
+  {39179.35f, 1, 'g', 1},
+  {43101.28f, 1, 'g', 0},
+  {53757.68f, 2, 'b', 3},
+  {57613.32f, 2, 'b', 2},
+  {59485.30f, 2, 'b', 1},
+  {63457.50f, 2, 'b', 0},
+  {80243.20f, 3, 'y', 3},
+  {83908.05f, 3, 'y', 2},
+  {86608.96f, 3, 'y', 1},
+  {89791.41f, 3, 'y', 0},
+};
+
+
 
 bool compareByColourAndBlackPort(const wireConnection &wire1, const wireConnection &wire2) {
   if (wire1.colour != wire2.colour) {
@@ -61,7 +81,7 @@ float findAverageResistance(int sensorNumber, int numberOfTests, boolean redOffs
   return averageResistance;
 }
 
-std::vector<wireConnection> readCurrentWireSetup(int redOffset, int blackOffset, boolean redOffsetOn = true) {
+std::vector<wireConnection> readCurrentWireSetupCalibration(int redOffset, int blackOffset, boolean redOffsetOn = true) {
   char colours[] = { 'r', 'g', 'b', 'y' };
   std::vector<wireConnection> currentWireSetup;
   for (int sensorNum = 0; sensorNum < numSensors; sensorNum++) {
@@ -86,8 +106,25 @@ void printWireConnections(std::vector<wireConnection> &values) {
   Serial.println("---------------");
 }
 
+void printWireConnectionsRaw(std::vector<wireConnection> &values) {
+
+  Serial.println("{");
+  for (const auto &connection : values) {
+    Serial.print("    {");
+    Serial.print(connection.resistanceValue, 2); // 2 decimal places
+    Serial.print("f, ");
+    Serial.print(connection.redPort);
+    Serial.print(", '");
+    Serial.print(connection.colour);
+    Serial.print("', ");
+    Serial.print(connection.blackPort);
+    Serial.println("},");
+  }
+  Serial.println("};");
+}
+
 void printCurrentWireConnections() {
-  std::vector<wireConnection> currentValues = readCurrentWireSetup(0, 0);
+  std::vector<wireConnection> currentValues = readCurrentWireSetupCalibration(0, 0);
   std::sort(currentValues.begin(), currentValues.end(), compareByColourAndBlackPort);
   printWireConnections(currentValues);
 }
@@ -118,7 +155,7 @@ void calibrateRedPorts() {
       }
     } while (true);
 
-    std::vector<wireConnection> currentValues = readCurrentWireSetup(moveRedWires, 0, false);
+    std::vector<wireConnection> currentValues = readCurrentWireSetupCalibration(moveRedWires, 0, false);
     calibrationValues.insert(calibrationValues.end(), currentValues.begin(), currentValues.end());
   }
 
@@ -185,7 +222,7 @@ void calibrateWires() {
       }
     } while (true);
 
-    std::vector<wireConnection> currentValues = readCurrentWireSetup(0, moveBlackWires);
+    std::vector<wireConnection> currentValues = readCurrentWireSetupCalibration(0, moveBlackWires);
     calibrationValues.insert(calibrationValues.end(), currentValues.begin(), currentValues.end());
   }
 
@@ -194,4 +231,6 @@ void calibrateWires() {
   // std::sort(allWireConnections.begin(), allWireConnections.end(), compareByColourAndBlackPort);
   std::sort(allWireConnections.begin(), allWireConnections.end(), compareByResistance);
   printWireConnections(allWireConnections);
+  Serial.println();
+  printWireConnectionsRaw(allWireConnections);
 }

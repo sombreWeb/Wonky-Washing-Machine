@@ -1,4 +1,5 @@
 #include <SPI.h>
+#include "wires_game.h"
 
 void setup() {
   Serial.begin(9600);
