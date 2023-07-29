@@ -15,7 +15,7 @@ void setup() {
   //runActivation();
   //runKnobs();
   //runPatternGame();
-  runWireGame();
+  runWiresGame();
 
   Serial.print("done");
 }

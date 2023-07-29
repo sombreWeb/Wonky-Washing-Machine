@@ -11,7 +11,7 @@
 /**
    Level for the pattern game.
 */
-int patternGameLevel = 3;
+int patternGameLevel = 1;
 
 /**
    Flag to track the completion of the pattern game.

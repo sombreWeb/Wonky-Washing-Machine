@@ -15,23 +15,24 @@ const int numberOfResistanceTests = 100;
 
 std::vector<wireConnection> allWireConnections =
 {
-  {4003.12f, 0, 'r', 3},
-  {7201.33f, 0, 'r', 2},
-  {8931.46f, 0, 'r', 1},
-  {12252.57f, 0, 'r', 0},
-  {33887.31f, 1, 'g', 3},
-  {37491.65f, 1, 'g', 2},
-  {39179.35f, 1, 'g', 1},
-  {43101.28f, 1, 'g', 0},
-  {53757.68f, 2, 'b', 3},
-  {57613.32f, 2, 'b', 2},
-  {59485.30f, 2, 'b', 1},
-  {63457.50f, 2, 'b', 0},
-  {80243.20f, 3, 'y', 3},
-  {83908.05f, 3, 'y', 2},
-  {86608.96f, 3, 'y', 1},
-  {89791.41f, 3, 'y', 0},
+  {4000.23f, 0, 'r', 3},
+  {7209.54f, 0, 'r', 2},
+  {8936.74f, 0, 'r', 1},
+  {12293.61f, 0, 'r', 0},
+  {33976.17f, 1, 'g', 3},
+  {37543.95f, 1, 'g', 2},
+  {39447.70f, 1, 'g', 1},
+  {43177.25f, 1, 'g', 0},
+  {53826.62f, 2, 'b', 3},
+  {57645.47f, 2, 'b', 2},
+  {59612.64f, 2, 'b', 1},
+  {63650.66f, 2, 'b', 0},
+  {80423.53f, 3, 'y', 3},
+  {84486.32f, 3, 'y', 2},
+  {86628.45f, 3, 'y', 1},
+  {91056.41f, 3, 'y', 0},
 };
+
 
 
 
@@ -93,13 +94,14 @@ std::vector<wireConnection> readCurrentWireSetupCalibration(int redOffset, int b
 }
 
 void printWireConnections(std::vector<wireConnection> &values) {
+
   for (const auto &connection : values) {
     Serial.print("Resistance: ");
     Serial.print(connection.resistanceValue);
     Serial.print(" Ohms, Red Port: ");
     Serial.print(connection.redPort);
     Serial.print(", Colour: ");
-    Serial.print(connection.colour);
+    Serial.print(String(connection.colour));
     Serial.print(", Black Port: ");
     Serial.println(connection.blackPort);
   }
