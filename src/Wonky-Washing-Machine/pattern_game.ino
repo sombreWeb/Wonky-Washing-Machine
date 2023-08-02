@@ -5,8 +5,8 @@
 
 #define BUTTON_PIN_RED 8     // Pin for the red button
 #define BUTTON_PIN_GREEN 9   // Pin for the green button
-#define BUTTON_PIN_BLUE 10   // Pin for the blue button
-#define BUTTON_PIN_YELLOW 11 // Pin for the yellow button
+#define BUTTON_PIN_BLUE 17   // Pin for the blue button
+#define BUTTON_PIN_YELLOW 18 // Pin for the yellow button
 
 /**
    Level for the pattern game.

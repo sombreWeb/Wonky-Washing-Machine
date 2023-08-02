@@ -4,12 +4,19 @@
 #include "wire_calibration.h"
 #include "ArduinoSTL.h"
 
-void setupWireGame();
-void runWiresGame();
+struct LevelData {
+  std::vector<wireConnection> levelSolution;
+  String clue;
+};
+
+void showClue(String clue);
 bool checkIfWiresCorrect();
-std::vector<wireConnection> getSolution(int level);
+LevelData getLevelData(int level);
 std::vector<wireConnection> filterClosestColourValues(std::vector<wireConnection>& connections, float externalAverageResistance);
 std::vector<wireConnection> getCurrentConnections();
 bool compareByRedPort(const wireConnection& connection1, const wireConnection& connection2);
+void flashColours(std::vector<wireConnection> solutionToFlash);
+void setupWireGame();
+void runWiresGame();
 
 #endif

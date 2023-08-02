@@ -2,39 +2,36 @@
 #include "wire_calibration.h"
 
 const int numSensors = 4;
-const int sensorPins[] = { A0, A1, A2, A3 };
+const int sensorPins[] = { A1, A2, A3, A4 };
 int sensorValues[numSensors] = { 0 };
 float Vouts[numSensors] = { 0 };
 float Vin = 5;
 float Rref = 20000;
 
 int homePort = 0;
-const float redPortOffsets[numSensors] = { 0, -0.0334, -0.0255, -0.0196 };
+const float redPortOffsets[numSensors] = {0.00, -0.0234, -0.0179, -0.0147};
 
-const int numberOfResistanceTests = 100;
+const int numberOfResistanceTests = 50;
 
 std::vector<wireConnection> allWireConnections =
 {
-  {4000.23f, 0, 'r', 3},
-  {7209.54f, 0, 'r', 2},
-  {8936.74f, 0, 'r', 1},
-  {12293.61f, 0, 'r', 0},
-  {33976.17f, 1, 'g', 3},
-  {37543.95f, 1, 'g', 2},
-  {39447.70f, 1, 'g', 1},
-  {43177.25f, 1, 'g', 0},
-  {53826.62f, 2, 'b', 3},
-  {57645.47f, 2, 'b', 2},
-  {59612.64f, 2, 'b', 1},
-  {63650.66f, 2, 'b', 0},
-  {80423.53f, 3, 'y', 3},
-  {84486.32f, 3, 'y', 2},
-  {86628.45f, 3, 'y', 1},
-  {91056.41f, 3, 'y', 0},
+  {4503.76f, 0, 'r', 0},
+  {7830.79f, 0, 'r', 1},
+  {9483.86f, 0, 'r', 2},
+  {12947.08f, 0, 'r', 3},
+  {17951.27f, 1, 'g', 0},
+  {20878.36f, 1, 'g', 1},
+  {22810.22f, 1, 'g', 2},
+  {26135.48f, 1, 'g', 3},
+  {33745.24f, 2, 'b', 0},
+  {37460.39f, 2, 'b', 1},
+  {38621.08f, 2, 'b', 2},
+  {42251.26f, 2, 'b', 3},
+  {52172.80f, 3, 'y', 0},
+  {55292.11f, 3, 'y', 1},
+  {57618.33f, 3, 'y', 2},
+  {60319.80f, 3, 'y', 3},
 };
-
-
-
 
 bool compareByColourAndBlackPort(const wireConnection &wire1, const wireConnection &wire2) {
   if (wire1.colour != wire2.colour) {
@@ -156,7 +153,6 @@ void calibrateRedPorts() {
         Serial.println("Invalid input. Please enter 'ok'.");
       }
     } while (true);
-
     std::vector<wireConnection> currentValues = readCurrentWireSetupCalibration(moveRedWires, 0, false);
     calibrationValues.insert(calibrationValues.end(), currentValues.begin(), currentValues.end());
   }

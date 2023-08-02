@@ -6,10 +6,13 @@ void setup() {
   SPI.begin();
   
   randomSeed(analogRead(A0));
+
+  //calibrateRedPorts();
+  //calibrateWires();
  
-  setupActivation();
-  setupKnobs();
-  setupPatternGame();
+  //setupActivation();
+  //setupKnobs();
+  //setupPatternGame();
   setupWireGame();
   
   //runActivation();
