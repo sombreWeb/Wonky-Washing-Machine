@@ -1,4 +1,7 @@
 #include <SPI.h>
+#include "activation.h"
+#include "knobs_game.h"
+#include "pattern_game.h"
 #include "wires_game.h"
 
 void setup() {
