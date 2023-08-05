@@ -3,9 +3,9 @@
 
 #include <Arduino.h>
 
-#define POT_PIN_1 A2
-#define POT_PIN_2 A3
-#define POT_PIN_3 A4
+#define POT_PIN_1 A1
+#define POT_PIN_2 A2
+#define POT_PIN_3 A3
 
 extern bool knobs_complete;
 extern int desired_knob1;

@@ -1,12 +1,5 @@
+#include "pattern_game.h"
 #include <FastLED.h> // FastLED library for controlling LEDs
-
-#define LEDS_DATA_PIN 7      // Data pin for the LED strip
-#define NUM_LEDS 4           // Number of LEDs in the strip
-
-#define BUTTON_PIN_RED 8     // Pin for the red button
-#define BUTTON_PIN_GREEN 9   // Pin for the green button
-#define BUTTON_PIN_BLUE 17   // Pin for the blue button
-#define BUTTON_PIN_YELLOW 18 // Pin for the yellow button
 
 /**
    Level for the pattern game.
@@ -17,6 +10,8 @@ int patternGameLevel = 1;
    Flag to track the completion of the pattern game.
 */
 bool patternGameComplete = false;
+
+const int LED_BRIGHTNESS_PATTERN_GAME = 100;
 
 /**
    Length of the patterns per level.
@@ -69,7 +64,165 @@ void setupPatternGame()
   pinMode(BUTTON_PIN_YELLOW, INPUT);
 
   FastLED.addLeds<NEOPIXEL, LEDS_DATA_PIN>(leds, NUM_LEDS);
-  FastLED.setBrightness(10);
+  FastLED.setBrightness(LED_BRIGHTNESS_PATTERN_GAME);
+
+  fillLights("black");
+  
+  delay(500);
+}
+
+/**
+   Function to run the pattern game.
+*/
+void runPatternGame()
+{
+  // Set game level
+  int patternLength, patternIncrement, patternSpeed;
+
+  switch (patternGameLevel)
+  {
+    case 1:
+      patternLength = patternLengthLevel1;
+      patternIncrement = patternIncrementLevel1;
+      patternSpeed = patternSpeedLevel1;
+      break;
+    case 2:
+      patternLength = patternLengthLevel2;
+      patternIncrement = patternIncrementLevel2;
+      patternSpeed = patternSpeedLevel2;
+      break;
+    case 3:
+      patternLength = patternLengthLevel3;
+      patternIncrement = patternIncrementLevel3;
+      patternSpeed = patternSpeedLevel3;
+      break;
+    default:
+      patternLength = patternLengthLevel1;
+      patternIncrement = patternIncrementLevel1;
+      patternSpeed = patternSpeedLevel1;
+  }
+
+  // Generate a random pattern
+  int *randomPattern = generateRandomPatternTop(patternLength);
+
+  // Loop until the game is complete
+  while (!patternGameComplete)
+  {
+    // Loop through the game in increments to give it the progressive completion effect
+    for (int patternSegment = 2; patternSegment < (patternLength + patternIncrement); patternSegment += patternIncrement)
+    {
+
+      bool segmentComplete = false; // Flag to check if this segment of the game is complete
+
+      // Loop over this segment repeatedly until the player completes the segment
+      while (!segmentComplete)
+      {
+
+        // Display the colours to the player
+        for (int colourIndex = 0; colourIndex < (patternSegment + 1); colourIndex++) // Plus one for the white flash
+        {
+          if (segmentComplete) // Stop looping if this segment is complete
+          {
+            break;
+          }
+
+          // Set the colour
+          unsigned long colour;
+          switch (randomPattern[colourIndex])
+          {
+            case 0:
+              colour = RED_HEX;
+              break;
+            case 1:
+              colour = GREEN_HEX;
+              break;
+            case 2:
+              colour = BLUE_HEX;
+              break;
+            case 3:
+              colour = YELLOW_HEX;
+              break;
+            default:
+              colour = WHITE_HEX;
+              break;
+          }
+
+          setLEDTop(randomPattern[colourIndex], colour); // Display the colour on the LEDs
+
+          if (colourIndex == patternSegment) // Do a white flash at the end of the pattern
+          {
+            fillLights("white");
+          }
+
+          // Loop to delay LED turning off. Allows continuous checking for a button press to interrupt lights flashing
+          for (int lightDelayIncrement = 0; lightDelayIncrement < patternSpeed; lightDelayIncrement++)
+          {
+
+            if (segmentComplete) // Stop looping if this segment is complete
+            {
+              break;
+            }
+
+            // Create an array to store the sequence of pressed buttons. Initialise them all to -1
+            int buttonsPressed[patternLength];
+            for (int buttonIdx = 0; buttonIdx < patternLength; buttonIdx++)
+            {
+              buttonsPressed[buttonIdx] = -1;
+            }
+
+            // Loop to check for a button press. This loop allows us to reset the timer between button presses on continue
+            while (true)
+            {
+
+              // check if button pressed
+              if (checkButtonPressed() > -1)
+              {
+                // add to buttons pressed queue
+                updateButtonQueue(buttonsPressed, patternLength);
+
+                // turn off lights
+                fillLights("black");
+
+                // Loop to enter button pressed mode. Stop showing the player the pattern and wait until a set time for another press
+                for (int buttonDelayIncrement = 0; buttonDelayIncrement < BUTTON_PRESS_WAIT_TIME; buttonDelayIncrement++)
+                {
+                  if (segmentComplete) // Stop looping if this segment is complete
+                  {
+                    break;
+                  }
+
+                  if (checkButtonPressed() > -1) // If a button is pressed start the timer again and wait for another
+                  {
+                    continue;
+                  }
+
+                  // Check if the segment pattern was completed successfully
+                  if (compareArrays(&(buttonsPressed[patternLength - patternSegment]), randomPattern, patternSegment))
+                  { // the subtraction here allows a dynamic start point for the buttons pressed array pointer which adds to the end of the queue
+                    segmentComplete = true;
+                    delay(patternSpeed); // A delay to stop the next segment starting immediately
+                  }
+
+                  delay(1); // Delay between button checks
+                }
+              }
+              else
+              {
+                break; // Break from button pressed mode if no button was pressed in the time limit
+              }
+            }
+
+            delay(1); // Delay light display time
+          }
+        }
+      }
+    }
+
+    fillLights("green"); // Fill LEDs to green when the pattern game was completed successfully
+    patternGameComplete = true; // End the game
+  }
+
+  delete[] randomPattern; // Release the memory allocated for the random pattern array
 }
 
 /**
@@ -214,158 +367,4 @@ bool compareArrays(const int *array1, const int *array2, int arrayLength)
     }
   }
   return true; // Arrays are equal
-}
-
-/**
-   Function to run the pattern game.
-*/
-void runPatternGame()
-{
-  // Set game level
-  int patternLength, patternIncrement, patternSpeed;
-
-  switch (patternGameLevel)
-  {
-    case 1:
-      patternLength = patternLengthLevel1;
-      patternIncrement = patternIncrementLevel1;
-      patternSpeed = patternSpeedLevel1;
-      break;
-    case 2:
-      patternLength = patternLengthLevel2;
-      patternIncrement = patternIncrementLevel2;
-      patternSpeed = patternSpeedLevel2;
-      break;
-    case 3:
-      patternLength = patternLengthLevel3;
-      patternIncrement = patternIncrementLevel3;
-      patternSpeed = patternSpeedLevel3;
-      break;
-    default:
-      patternLength = patternLengthLevel1;
-      patternIncrement = patternIncrementLevel1;
-      patternSpeed = patternSpeedLevel1;
-  }
-
-  // Generate a random pattern
-  int *randomPattern = generateRandomPatternTop(patternLength);
-
-  // Loop until the game is complete
-  while (!patternGameComplete)
-  {
-    // Loop through the game in increments to give it the progressive completion effect
-    for (int patternSegment = 2; patternSegment < (patternLength + patternIncrement); patternSegment += patternIncrement)
-    {
-
-      bool segmentComplete = false; // Flag to check if this segment of the game is complete
-
-      // Loop over this segment repeatedly until the player completes the segment
-      while (!segmentComplete)
-      {
-
-        // Display the colours to the player
-        for (int colourIndex = 0; colourIndex < (patternSegment + 1); colourIndex++) // Plus one for the white flash
-        {
-          if (segmentComplete) // Stop looping if this segment is complete
-          {
-            break;
-          }
-
-          // Set the colour
-          unsigned long colour;
-          switch (randomPattern[colourIndex])
-          {
-            case 0:
-              colour = RED_HEX;
-              break;
-            case 1:
-              colour = GREEN_HEX;
-              break;
-            case 2:
-              colour = BLUE_HEX;
-              break;
-            case 3:
-              colour = YELLOW_HEX;
-              break;
-            default:
-              colour = WHITE_HEX;
-              break;
-          }
-
-          setLEDTop(randomPattern[colourIndex], colour); // Display the colour on the LEDs
-
-          if (colourIndex == patternSegment) // Do a white flash at the end of the pattern
-          {
-            fillLights("white");
-          }
-
-          // Loop to delay LED turning off. Allows continuous checking for a button press to interrupt lights flashing
-          for (int lightDelayIncrement = 0; lightDelayIncrement < patternSpeed; lightDelayIncrement++)
-          {
-
-            if (segmentComplete) // Stop looping if this segment is complete
-            {
-              break;
-            }
-
-            // Create an array to store the sequence of pressed buttons. Initialise them all to -1
-            int buttonsPressed[patternLength];
-            for (int buttonIdx = 0; buttonIdx < patternLength; buttonIdx++)
-            {
-              buttonsPressed[buttonIdx] = -1;
-            }
-
-            // Loop to check for a button press. This loop allows us to reset the timer between button presses on continue 
-            while (true)
-            {
-
-              // check if button pressed
-              if (checkButtonPressed() > -1)
-              {
-                // add to buttons pressed queue
-                updateButtonQueue(buttonsPressed, patternLength);
-
-                // turn off lights
-                fillLights("black");
-
-                // Loop to enter button pressed mode. Stop showing the player the pattern and wait until a set time for another press
-                for (int buttonDelayIncrement = 0; buttonDelayIncrement < BUTTON_PRESS_WAIT_TIME; buttonDelayIncrement++)
-                {
-                  if (segmentComplete) // Stop looping if this segment is complete
-                  {
-                    break;
-                  }
-
-                  if (checkButtonPressed() > -1) // If a button is pressed start the timer again and wait for another
-                  {
-                    continue;
-                  }
-
-                  // Check if the segment pattern was completed successfully
-                  if (compareArrays(&(buttonsPressed[patternLength - patternSegment]), randomPattern, patternSegment))
-                  { // the subtraction here allows a dynamic start point for the buttons pressed array pointer which adds to the end of the queue
-                    segmentComplete = true;
-                    delay(patternSpeed); // A delay to stop the next segment starting immediately 
-                  }
-                  
-                  delay(1); // Delay between button checks
-                }
-              }
-              else
-              {
-                break; // Break from button pressed mode if no button was pressed in the time limit 
-              }
-            }
-
-            delay(1); // Delay light display time
-          }
-        }
-      }
-    }
-
-    fillLights("green"); // Fill LEDs to green when the pattern game was completed successfully
-    patternGameComplete = true; // End the game
-  }
-
-  delete[] randomPattern; // Release the memory allocated for the random pattern array
 }

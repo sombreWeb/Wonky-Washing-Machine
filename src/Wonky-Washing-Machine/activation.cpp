@@ -1,44 +1,39 @@
+#include "activation.h"
 #include <MFRC522.h>
 
-#define RST_PIN 49
-#define SS_PIN 53
-
-#define RED_PIN 26
-#define GREEN_PIN 24
-#define BLUE_PIN 22
-
 /**
- * @brief Flag indicating whether the activation process is complete.
- */
+   @brief Flag indicating whether the activation process is complete.
+*/
 bool activationComplete = false;
 
 /**
- * @brief The desired UID (unique identifier) of the RFID card.
- * @note This is unique to the tag used and must be read and set below.
- */
+   @brief The desired UID (unique identifier) of the RFID card.
+   @note This is unique to the tag used and must be read and set below.
+*/
 byte desiredUID[] = {0x2A, 0x4F, 0xF5, 0x81};
 
 /**
- * @brief Instance of the MFRC522 RFID reader.
- */
-MFRC522 mfrc522(SS_PIN, RST_PIN);
+   @brief Instance of the MFRC522 RFID reader.
+*/
+MFRC522 mfrc522(SS_PIN_RFID, RST_PIN_RFID);
 
 /**
- * @brief Initializes the activation setup.
- */
+   @brief Initializes the activation setup.
+*/
 void setupActivation() {
   pinMode(RED_PIN, OUTPUT);
   pinMode(GREEN_PIN, OUTPUT);
   pinMode(BLUE_PIN, OUTPUT);
-  
+
   mfrc522.PCD_Init();
-  
+
   setActivationLED("red");
+  delay(500);
 }
 
 /**
- * @brief Runs the activation process.
- */
+   @brief Runs the activation process.
+*/
 void runActivation() {
   while (!activationComplete) {
     if (checkUIDMatch(desiredUID)) {
@@ -49,11 +44,12 @@ void runActivation() {
 }
 
 /**
- * @brief Checks if the detected UID matches the desired UID.
- * @param desiredUID The desired UID to compare against.
- * @return True if the detected UID matches the desired UID, false otherwise.
- */
+   @brief Checks if the detected UID matches the desired UID.
+   @param desiredUID The desired UID to compare against.
+   @return True if the detected UID matches the desired UID, false otherwise.
+*/
 bool checkUIDMatch(byte* desiredUID) {
+
   if (mfrc522.PICC_IsNewCardPresent() && mfrc522.PICC_ReadCardSerial()) {
     for (byte i = 0; i < mfrc522.uid.size; i++) {
       if (mfrc522.uid.uidByte[i] != desiredUID[i]) {
@@ -61,13 +57,15 @@ bool checkUIDMatch(byte* desiredUID) {
       }
     }
     return true;
+  } else {
+    return false;
   }
 }
 
 /**
- * @brief Sets the activation LED to the specified colour.
- * @param colour The colour to set the activation LED to ("red", "green", "blue").
- */
+   @brief Sets the activation LED to the specified colour.
+   @param colour The colour to set the activation LED to ("red", "green", "blue").
+*/
 void setActivationLED(String colour) {
   if (colour == "red") {
     digitalWrite(RED_PIN, HIGH);

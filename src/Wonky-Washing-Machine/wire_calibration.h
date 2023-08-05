@@ -1,6 +1,11 @@
 #ifndef WIRE_CALIBRATION_H
 #define WIRE_CALIBRATION_H
 
+#define PORT_PIN_0 A4
+#define PORT_PIN_1 A5  
+#define PORT_PIN_2 A6
+#define PORT_PIN_3 A7
+
 #include "ArduinoSTL.h"
 
 struct wireConnection {

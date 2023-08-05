@@ -1,6 +1,5 @@
-#define POT_PIN_1 A2
-#define POT_PIN_2 A3
-#define POT_PIN_3 A4
+
+#include "knobs_game.h"
 
 /**
  * @brief Flag indicating whether the knobs process is complete.
@@ -30,8 +29,11 @@ void setupKnobs(){
  */
 void runKnobs() {
   while (!knobs_complete) {
+    delay(500);
     int pot_value1 = mapPotToNumber(analogRead(POT_PIN_1));
+    delay(500);
     int pot_value2 = mapPotToNumber(analogRead(POT_PIN_2));
+    delay(500);
     int pot_value3 = mapPotToNumber(analogRead(POT_PIN_3));
 
     Serial.println("-------------");

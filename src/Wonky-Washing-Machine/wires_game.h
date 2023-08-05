@@ -4,6 +4,8 @@
 #include "wire_calibration.h"
 #include "ArduinoSTL.h"
 
+#define SS_PIN_MATRIX A8
+
 struct LevelData {
   std::vector<wireConnection> levelSolution;
   String clue;

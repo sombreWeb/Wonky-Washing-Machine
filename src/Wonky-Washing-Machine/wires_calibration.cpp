@@ -2,36 +2,41 @@
 #include "wire_calibration.h"
 
 const int numSensors = 4;
-const int sensorPins[] = { A1, A2, A3, A4 };
+const int sensorPins[] = { PORT_PIN_0, PORT_PIN_1, PORT_PIN_2, PORT_PIN_3 };
 int sensorValues[numSensors] = { 0 };
 float Vouts[numSensors] = { 0 };
 float Vin = 5;
-float Rref = 20000;
+float Rref = 15000;
 
 int homePort = 0;
-const float redPortOffsets[numSensors] = {0.00, -0.0234, -0.0179, -0.0147};
+const float redPortOffsets[numSensors] = {0.00, 0.0073, 0.0107, 0.0044};
 
-const int numberOfResistanceTests = 50;
+const int numberOfResistanceTests = 100;
 
 std::vector<wireConnection> allWireConnections =
 {
-  {4503.76f, 0, 'r', 0},
-  {7830.79f, 0, 'r', 1},
-  {9483.86f, 0, 'r', 2},
-  {12947.08f, 0, 'r', 3},
-  {17951.27f, 1, 'g', 0},
-  {20878.36f, 1, 'g', 1},
-  {22810.22f, 1, 'g', 2},
-  {26135.48f, 1, 'g', 3},
-  {33745.24f, 2, 'b', 0},
-  {37460.39f, 2, 'b', 1},
-  {38621.08f, 2, 'b', 2},
-  {42251.26f, 2, 'b', 3},
-  {52172.80f, 3, 'y', 0},
-  {55292.11f, 3, 'y', 1},
-  {57618.33f, 3, 'y', 2},
-  {60319.80f, 3, 'y', 3},
+  {7210.91f, 0, 'r', 0},
+  {8662.01f, 0, 'r', 1},
+  {9548.58f, 0, 'r', 2},
+  {11707.41f, 0, 'r', 3},
+  
+  {13088.73f, 1, 'g', 0},
+  {14616.57f, 1, 'g', 1},
+  {15617.80f, 1, 'g', 2},
+  {17981.57f, 1, 'g', 3},
+  
+  {19946.94f, 2, 'b', 0},
+  {21607.99f, 2, 'b', 1},
+  {22601.43f, 2, 'b', 2},
+  {25210.05f, 2, 'b', 3},
+  
+  {30504.54f, 3, 'y', 0},
+  {32382.50f, 3, 'y', 1},
+  {33589.34f, 3, 'y', 2},
+  {36360.05f, 3, 'y', 3},
 };
+
+
 
 bool compareByColourAndBlackPort(const wireConnection &wire1, const wireConnection &wire2) {
   if (wire1.colour != wire2.colour) {
@@ -70,7 +75,8 @@ float findAverageResistance(int sensorNumber, int numberOfTests, boolean redOffs
     Vouts[sensorNumber] = (Vin * sensorValues[sensorNumber]) / 1023.0;
     float resistance = Rref * (1.0 / ((Vin / Vouts[sensorNumber]) - 1.0));
     sumResistance += resistance;
-    delay(5);  // Delay to allow the ADC to stabilize between readings
+
+    delay(10);  // Delay to allow the ADC to stabilize between readings
   }
   float averageResistance = sumResistance / numberOfTests;  // Calculate average resistance
   if (redOffsetOn) {

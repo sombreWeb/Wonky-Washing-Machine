@@ -4,12 +4,12 @@
 #include <Arduino.h>
 #include <MFRC522.h>
 
-#define RST_PIN 49
-#define SS_PIN 53
+#define RST_PIN_RFID 49
+#define SS_PIN_RFID 53
 
-#define RED_PIN 26
-#define GREEN_PIN 24
-#define BLUE_PIN 22
+#define RED_PIN 48
+#define GREEN_PIN 46
+#define BLUE_PIN 47
 
 extern bool activationComplete;
 extern byte desiredUID[];

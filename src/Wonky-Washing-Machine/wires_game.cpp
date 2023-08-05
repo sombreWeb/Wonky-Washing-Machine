@@ -7,25 +7,103 @@
 #define HARDWARE_TYPE MD_MAX72XX::FC16_HW
 #define NUM_LED_MATRICES 8
 
-#define CLK_PIN 13
-#define DATA_PIN 11
-#define CS_PIN 10
+//#define CLK_PIN 13
+//#define DATA_PIN 11
 
 const int LIGHT_INTENSITY = 1;
 
-MD_MAX72XX mx = MD_MAX72XX(HARDWARE_TYPE, CS_PIN, NUM_LED_MATRICES);
+MD_MAX72XX mx = MD_MAX72XX(HARDWARE_TYPE, SS_PIN_MATRIX, NUM_LED_MATRICES);
 
-const float searchTolerance = 2500.0f;
+const float searchTolerance = 1000.0f;
 
 int wiresGameLevel = 1;
 
 bool wiresGameComplete = false;
 
-
-
 String clue;
 std::vector<wireConnection> solution;
 std::vector<wireConnection> currentWireConnections;
+
+
+void setupWireGame()
+{
+  LevelData levelData = getLevelData(wiresGameLevel);
+  solution = levelData.levelSolution;
+  clue = levelData.clue;
+  mx.begin();
+  mx.control(MD_MAX72XX::INTENSITY, LIGHT_INTENSITY);
+  delay(500);
+}
+
+void runWiresGame()
+{
+  boolean displayBaseClueFlag = true;
+  unsigned long baseClueDuration = 15000;
+  unsigned long colourClueDuration = 3000;
+  unsigned long currentMillis = 0;
+  boolean colourClueEnabled = true;
+  unsigned long actionStartTime = 0;
+  boolean isFirstAction = true;
+  boolean lastActionWasShowClue = false;
+  boolean lastActionWasFlashColours = false;
+
+  //Temporary
+  if (wiresGameLevel == 1) {
+    colourClueEnabled = false;
+  }
+
+  showClue(clue);
+
+  while (!wiresGameComplete) {
+    currentMillis = millis();
+
+    printWireConnections(currentWireConnections);
+    std::vector<wireConnection> currentConnections = readCurrentWireSetupCalibration(0, 0);
+    Serial.println("--------\\\///---------");
+    printWireConnections(currentConnections);
+
+
+    if (colourClueEnabled) {
+      if (displayBaseClueFlag) {
+        if (currentMillis - actionStartTime >= baseClueDuration) {
+          displayBaseClueFlag = false;
+          actionStartTime = currentMillis;
+          flashColours(solution);
+          lastActionWasFlashColours = true;
+          lastActionWasShowClue = false;
+          Serial.println("1");
+        } else {
+          if (!lastActionWasShowClue) {
+            showClue(clue);
+            lastActionWasShowClue = true;
+            lastActionWasFlashColours = false;
+            Serial.println("2");
+          }
+        }
+      } else {
+        if (currentMillis - actionStartTime >= colourClueDuration) {
+          displayBaseClueFlag = true;
+          actionStartTime = currentMillis;
+          if (!lastActionWasShowClue) {
+            showClue(clue);
+            lastActionWasShowClue = true;
+            lastActionWasFlashColours = false;
+            Serial.println("3");
+          }
+        } else {
+          if (!lastActionWasFlashColours) {
+            flashColours(solution);
+            lastActionWasFlashColours = true;
+            lastActionWasShowClue = false;
+            Serial.println("4");
+          }
+        }
+      }
+    }
+
+    wiresGameComplete = checkIfWiresCorrect();
+  }
+}
 
 void showClue(String clue) {
   String text = clue.substring(4, 8) + clue.substring(0, 4);
@@ -217,85 +295,4 @@ void flashColours(std::vector<wireConnection> solutionToFlash) {
   text.toUpperCase();
 
   showClue(text);
-}
-
-
-void setupWireGame()
-{
-  LevelData levelData = getLevelData(wiresGameLevel);
-  solution = levelData.levelSolution;
-  clue = levelData.clue;
-  mx.begin();
-  mx.control(MD_MAX72XX::INTENSITY, LIGHT_INTENSITY);
-  delay(1000);
-  showClue(clue);
-
-}
-
-void runWiresGame()
-{
-  boolean displayBaseClueFlag = true;
-  unsigned long baseClueDuration = 15000;
-  unsigned long colourClueDuration = 3000;
-  unsigned long currentMillis = 0;
-  boolean colourClueEnabled = true;
-  unsigned long actionStartTime = 0;
-  boolean isFirstAction = true;
-  boolean lastActionWasShowClue = false;
-  boolean lastActionWasFlashColours = false;
-
-  //Temporary
-  if (wiresGameLevel == 1) {
-    colourClueEnabled = false;
-  }
-
-  while (!wiresGameComplete) {
-    currentMillis = millis();
-
-    printWireConnections(currentWireConnections);
-    std::vector<wireConnection> currentConnections = readCurrentWireSetupCalibration(0, 0);
-    Serial.println("--------\\\///---------");
-    printWireConnections(currentConnections);
-
-
-    if (colourClueEnabled) {
-      if (displayBaseClueFlag) {
-        if (currentMillis - actionStartTime >= baseClueDuration) {
-          displayBaseClueFlag = false;
-          actionStartTime = currentMillis;
-          flashColours(solution);
-          lastActionWasFlashColours = true;
-          lastActionWasShowClue = false;
-          Serial.println("1");
-        } else {
-          if (!lastActionWasShowClue) {
-            showClue(clue);
-            lastActionWasShowClue = true;
-            lastActionWasFlashColours = false;
-            Serial.println("2");
-          }
-        }
-      } else {
-        if (currentMillis - actionStartTime >= colourClueDuration) {
-          displayBaseClueFlag = true;
-          actionStartTime = currentMillis;
-          if (!lastActionWasShowClue) {
-            showClue(clue);
-            lastActionWasShowClue = true;
-            lastActionWasFlashColours = false;
-            Serial.println("3");
-          }
-        } else {
-          if (!lastActionWasFlashColours) {
-            flashColours(solution);
-            lastActionWasFlashColours = true;
-            lastActionWasShowClue = false;
-            Serial.println("4");
-          }
-        }
-      }
-    }
-
-    wiresGameComplete = checkIfWiresCorrect();
-  }
 }
