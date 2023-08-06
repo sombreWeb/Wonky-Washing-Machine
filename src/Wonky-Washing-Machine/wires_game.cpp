@@ -47,7 +47,7 @@ void runWiresGame()
   boolean lastActionWasShowClue = false;
   boolean lastActionWasFlashColours = false;
 
-  //Temporary
+  // Diable colour clues for level one
   if (wiresGameLevel == 1) {
     colourClueEnabled = false;
   }

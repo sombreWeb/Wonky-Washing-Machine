@@ -1,4 +1,5 @@
 #include <SPI.h>
+#include "servo_controller.h"
 #include "activation.h"
 #include "knobs_game.h"
 #include "pattern_game.h"
@@ -11,15 +12,22 @@ void setup() {
 
   SPI.begin();
 
-  //calibrateRedPorts();
-  //calibrateWires();
-
-  
-
   // Set SS pins as OUTPUT and HIGH (off)
   pinMode(SS_PIN_RFID, OUTPUT);
   digitalWrite(SS_PIN_RFID, HIGH);
   pinMode(SS_PIN_MATRIX, OUTPUT);
+  digitalWrite(SS_PIN_MATRIX, HIGH);
+
+  setupKnobs();
+
+  setupPatternGame();
+
+  servoControllerSetup();
+
+  delay(500);
+  digitalWrite(SS_PIN_MATRIX, LOW);
+  delay(500);
+  setupWireGame();
   digitalWrite(SS_PIN_MATRIX, HIGH);
 
   delay(500);
@@ -28,27 +36,22 @@ void setup() {
   setupActivation();
   digitalWrite(SS_PIN_RFID, HIGH);
 
-  setupKnobs();
-
-  setupPatternGame();
-
-
-  delay(500);
-  digitalWrite(SS_PIN_MATRIX, LOW);
-  delay(500);
-  setupWireGame();
-  digitalWrite(SS_PIN_MATRIX, HIGH);
-
-
   delay(500);
   digitalWrite(SS_PIN_RFID, LOW);
   delay(500);
   runActivation();
   digitalWrite(SS_PIN_RFID, HIGH);
 
-  runKnobs();
+  //runKnobs();
+
+  openDoor(topServo, topPos);
 
   runPatternGame();
+
+  openDoor(sideServo, sidePos);
+
+  //calibrateRedPorts();
+  //calibrateWires();
 
   delay(500);
   digitalWrite(SS_PIN_MATRIX, LOW);
@@ -56,7 +59,7 @@ void setup() {
   runWiresGame();
   digitalWrite(SS_PIN_MATRIX, HIGH);
 
-  
+  openDoor(bottomServo, bottomPos);
 
   Serial.print("done");
 }
