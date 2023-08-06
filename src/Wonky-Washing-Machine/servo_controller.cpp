@@ -1,47 +1,59 @@
 #include "servo_controller.h"
-#include <Arduino.h> 
+#include <Arduino.h>
 #include <Servo.h>
 
-Servo topServo;
-int topPos = 0;
+ServoDetails topServo;
 
-Servo sideServo;
-int sidePos = 0;
+ServoDetails sideServo;
 
-Servo bottomServo;
-int bottomPos = 0;
+ServoDetails bottomServo;
+
 
 void servoControllerSetup() {
   pinMode(RELAY_PIN, OUTPUT);
-  topServo.attach(TOP_SERVO);
-  sideServo.attach(SIDE_SERVO);
-  bottomServo.attach(BOTTOM_SERVO);
-  closeDoor(topServo, topPos);
-  closeDoor(sideServo, sidePos);
-  closeDoor(bottomServo, bottomPos);
+
+  topServo.servo.attach(TOP_SERVO);
+  sideServo.servo.attach(SIDE_SERVO);
+  bottomServo.servo.attach(BOTTOM_SERVO);
+
+  topServo.pos = topServo.servo.read();
+  sideServo.pos = sideServo.servo.read();
+  bottomServo.pos = bottomServo.servo.read();
+
+  delay(5000);
+  closeDoor(topServo);
+    delay(5000);
+  closeDoor(sideServo);
+    delay(5000);
+  closeDoor(bottomServo);
 }
 
-void closeDoor(Servo &currentServo, int &currentPos) {
+void openDoor(ServoDetails &currentServo) {
   digitalWrite(RELAY_PIN, HIGH); //on
   delay(500);
 
-  for (currentPos = 0; currentPos <= 180; currentPos += 1) {
-    currentServo.write(currentPos);
-    delay(15);
+  while (currentServo.pos < currentServo.openPos) {
+    currentServo.servo.write(currentServo.pos + 1);
+    currentServo.pos = currentServo.servo.read();
+    delay(SWEEP_SPEED);
   }
 
   digitalWrite(RELAY_PIN, LOW); //off
   delay(500);
 }
 
-void openDoor(Servo &currentServo, int &currentPos) {
+void closeDoor(ServoDetails &currentServo) {
   digitalWrite(RELAY_PIN, HIGH); //on
   delay(500);
 
-  for (currentPos = 180; currentPos >= 0; currentPos -= 1)  {
-    currentServo.write(currentPos);
-    delay(15);
+  
+
+  while (currentServo.pos > currentServo.closePos) {
+    currentServo.servo.write(currentServo.pos - 1);
+    currentServo.pos = currentServo.servo.read();
+    delay(SWEEP_SPEED);
   }
+  
 
   digitalWrite(RELAY_PIN, LOW); //off
   delay(500);

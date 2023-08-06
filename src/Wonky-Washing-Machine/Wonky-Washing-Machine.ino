@@ -44,11 +44,11 @@ void setup() {
 
   //runKnobs();
 
-  //openDoor(topServo, topPos);
+  //openDoor(topServo);
 
   //runPatternGame();
 
-  //openDoor(sideServo, sidePos);
+  //openDoor(sideServo);
 
   //calibrateRedPorts();
   //calibrateWires();
@@ -59,7 +59,7 @@ void setup() {
   runWiresGame();
   digitalWrite(SS_PIN_MATRIX, HIGH);
 
-  openDoor(bottomServo, bottomPos);
+  openDoor(bottomServo);
 
   Serial.print("done");
 }

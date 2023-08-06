@@ -8,21 +8,23 @@
 #define SIDE_SERVO 6
 #define BOTTOM_SERVO 5
 
+struct ServoDetails {
+  Servo servo;
+  int pos = 0;
+  int openPos = 180;
+  int closePos = 0;
+};
+
 const int SWEEP_SPEED = 15;
 
-extern Servo topServo;
-extern int topPos;
-
-extern Servo sideServo;
-extern int sidePos;
-
-extern Servo bottomServo;
-extern int bottomPos;
+extern ServoDetails topServo;
+extern ServoDetails sideServo;
+extern ServoDetails bottomServo;
 
 void servoControllerSetup();
 
-void openDoor(Servo &currentServo, int &currentPos);
+void openDoor(ServoDetails &currentServo);
 
-void closeDoor(Servo &currentServo, int &currentPos);
+void closeDoor(ServoDetails &currentServo);
 
 #endif
