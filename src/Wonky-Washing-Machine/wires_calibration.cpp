@@ -8,8 +8,12 @@ float Vouts[numSensors] = { 0 };
 float Vin = 5;
 float Rref = 15000;
 
+const float MAX_ALLOWED_RESISTANCE_VALUE = 100000;
+
 int homePort = 0;
 const float redPortOffsets[numSensors] = {0.00, 0.0073, 0.0107, 0.0044};
+
+float liveConnectionOffsets[numSensors] = {0.00, 0.0, 0.0, 0.0};
 
 const int numberOfResistanceTests = 100;
 
@@ -33,7 +37,27 @@ std::vector<wireConnection> allWireConnections =
   {34466.62f, 3, 'y', 3},
 };
 
+void updateLiveConnectionOffsets() {
+  std::vector<wireConnection> currentLiveConnections = readCurrentWireSetupCalibration(0, 0);
 
+  for (int i = 0; i < currentLiveConnections.size(); ++i) {
+    
+    if ( currentLiveConnections[i].resistanceValue > MAX_ALLOWED_RESISTANCE_VALUE) {
+      liveConnectionOffsets[i] = 0.0;
+      continue;
+    }
+
+    if (currentLiveConnections[i].redPort == allWireConnections[(i * numSensors) + i].redPort &&
+        currentLiveConnections[i].colour == allWireConnections[(i * numSensors) + i].colour &&
+        currentLiveConnections[i].blackPort == allWireConnections[(i * numSensors) + i].blackPort) {
+
+      float diff = allWireConnections[(i * numSensors) + i].resistanceValue - currentLiveConnections[i].resistanceValue;
+      liveConnectionOffsets[i] = diff;
+    } else {
+      liveConnectionOffsets[i] = 0.0;
+    }
+  }
+}
 
 
 bool compareByColourAndBlackPort(const wireConnection &wire1, const wireConnection &wire2) {

@@ -21,7 +21,7 @@ void servoControllerSetup() {
   closeDoor(bottomServo, bottomPos);
 }
 
-void openDoor(Servo &currentServo, int &currentPos) {
+void closeDoor(Servo &currentServo, int &currentPos) {
   digitalWrite(RELAY_PIN, HIGH); //on
   delay(500);
 
@@ -34,7 +34,7 @@ void openDoor(Servo &currentServo, int &currentPos) {
   delay(500);
 }
 
-void closeDoor(Servo &currentServo, int &currentPos) {
+void openDoor(Servo &currentServo, int &currentPos) {
   digitalWrite(RELAY_PIN, HIGH); //on
   delay(500);
 

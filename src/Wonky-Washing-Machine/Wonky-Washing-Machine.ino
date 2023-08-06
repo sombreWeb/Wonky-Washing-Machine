@@ -44,11 +44,11 @@ void setup() {
 
   //runKnobs();
 
-  openDoor(topServo, topPos);
+  //openDoor(topServo, topPos);
 
-  runPatternGame();
+  //runPatternGame();
 
-  openDoor(sideServo, sidePos);
+  //openDoor(sideServo, sidePos);
 
   //calibrateRedPorts();
   //calibrateWires();

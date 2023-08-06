@@ -33,6 +33,7 @@ void setupWireGame()
   mx.begin();
   mx.control(MD_MAX72XX::INTENSITY, LIGHT_INTENSITY);
   delay(500);
+  updateLiveConnectionOffsets();
 }
 
 void runWiresGame()
@@ -154,6 +155,11 @@ bool compareByBlackPort(const wireConnection& connection1, const wireConnection&
 bool checkIfWiresCorrect() {
 
   currentWireConnections = getCurrentConnections();
+
+  // Add live offsets if they exist
+  for (int i = 0; i < currentWireConnections.size(); ++i) {
+    currentWireConnections[i].resistanceValue += liveConnectionOffsets[i];
+  }
 
   for (const wireConnection& solutionConnection : solution) {
 

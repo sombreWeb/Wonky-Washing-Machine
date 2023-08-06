@@ -17,6 +17,7 @@ struct wireConnection {
 
 extern const int numberOfResistanceTests, numSensors, sensorPins[];
 extern const float redPortOffsets[];
+extern float liveConnectionOffsets[];
 extern std::vector<wireConnection> allWireConnections;
 
 bool compareByColourAndBlackPort(const wireConnection &wire1, const wireConnection &wire2);
@@ -24,6 +25,8 @@ bool compareByColourAndBlackPort(const wireConnection &wire1, const wireConnecti
 bool compareByColourAndRedPort(const wireConnection &wire1, const wireConnection &wire2);
 
 bool compareByResistance(const wireConnection &wire1, const wireConnection &wire2);
+
+void updateLiveConnectionOffsets();
 
 double calculatePercentageDifference(double value1, double value2);
 
