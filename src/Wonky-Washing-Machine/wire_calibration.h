@@ -1,10 +1,10 @@
 #ifndef WIRE_CALIBRATION_H
 #define WIRE_CALIBRATION_H
 
-#define PORT_PIN_0 A4
-#define PORT_PIN_1 A5  
-#define PORT_PIN_2 A6
-#define PORT_PIN_3 A7
+#define PORT_PIN_0 0
+#define PORT_PIN_1 1  
+#define PORT_PIN_2 2
+#define PORT_PIN_3 3
 
 #include "ArduinoSTL.h"
 
@@ -20,6 +20,8 @@ extern const float redPortOffsets[];
 extern float liveConnectionOffsets[];
 extern std::vector<wireConnection> allWireConnections;
 
+void calibrationSetup();
+
 bool compareByColourAndBlackPort(const wireConnection &wire1, const wireConnection &wire2);
 
 bool compareByColourAndRedPort(const wireConnection &wire1, const wireConnection &wire2);
@@ -27,6 +29,8 @@ bool compareByColourAndRedPort(const wireConnection &wire1, const wireConnection
 bool compareByResistance(const wireConnection &wire1, const wireConnection &wire2);
 
 void updateLiveConnectionOffsets();
+
+void applyLiveConnectionOffsets();
 
 double calculatePercentageDifference(double value1, double value2);
 

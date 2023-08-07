@@ -20,11 +20,8 @@ void servoControllerSetup() {
   sideServo.pos = sideServo.servo.read();
   bottomServo.pos = bottomServo.servo.read();
 
-  delay(5000);
   closeDoor(topServo);
-    delay(5000);
   closeDoor(sideServo);
-    delay(5000);
   closeDoor(bottomServo);
 }
 

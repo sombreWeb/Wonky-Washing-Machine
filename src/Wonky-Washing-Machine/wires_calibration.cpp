@@ -1,47 +1,58 @@
 #include "ArduinoSTL.h"
 #include "wire_calibration.h"
+#include <Wire.h>
+#include <Adafruit_ADS1X15.h>
+
 
 const int numSensors = 4;
 const int sensorPins[] = { PORT_PIN_0, PORT_PIN_1, PORT_PIN_2, PORT_PIN_3 };
 int sensorValues[numSensors] = { 0 };
-float Vouts[numSensors] = { 0 };
+double Vouts[numSensors] = { 0 };
 float Vin = 5;
 float Rref = 15000;
+
+Adafruit_ADS1115 ads;
 
 const float MAX_ALLOWED_RESISTANCE_VALUE = 100000;
 
 int homePort = 0;
-const float redPortOffsets[numSensors] = {0.00, 0.0073, 0.0107, 0.0044};
+const float redPortOffsets[numSensors] = {0.00, 0.0052, 0.0003, -0.0031};
 
 float liveConnectionOffsets[numSensors] = {0.00, 0.0, 0.0, 0.0};
 
-const int numberOfResistanceTests = 100;
+const int numberOfResistanceTests = 20;
+
+void calibrationSetup() {
+  Wire.begin();
+  ads.setGain(GAIN_ONE);
+  ads.begin();
+}
 
 std::vector<wireConnection> allWireConnections =
 {
-  {6970.12f, 0, 'r', 0},
-  {8392.12f, 0, 'r', 1},
-  {9276.77f, 0, 'r', 2},
-  {11380.35f, 0, 'r', 3},
-  {12602.50f, 1, 'g', 0},
-  {14183.80f, 1, 'g', 1},
-  {15100.91f, 1, 'g', 2},
-  {17365.66f, 1, 'g', 3},
-  {19204.01f, 2, 'b', 0},
-  {20821.13f, 2, 'b', 1},
-  {21821.16f, 2, 'b', 2},
-  {24192.64f, 2, 'b', 3},
-  {28839.52f, 3, 'y', 0},
-  {30593.86f, 3, 'y', 1},
-  {31774.58f, 3, 'y', 2},
-  {34466.62f, 3, 'y', 3},
+  {3194.61f, 0, 'r', 0},
+  {3712.15f, 0, 'r', 1},
+  {4034.16f, 0, 'r', 2},
+  {4710.78f, 0, 'r', 3},
+  {5080.59f, 1, 'g', 0},
+  {5501.36f, 1, 'g', 1},
+  {5765.34f, 1, 'g', 2},
+  {6324.28f, 1, 'g', 3},
+  {6768.65f, 2, 'b', 0},
+  {7115.42f, 2, 'b', 1},
+  {7329.87f, 2, 'b', 2},
+  {7788.48f, 2, 'b', 3},
+  {8609.09f, 3, 'y', 0},
+  {8881.22f, 3, 'y', 1},
+  {9051.82f, 3, 'y', 2},
+  {9413.29f, 3, 'y', 3},
 };
 
 void updateLiveConnectionOffsets() {
   std::vector<wireConnection> currentLiveConnections = readCurrentWireSetupCalibration(0, 0);
 
   for (int i = 0; i < currentLiveConnections.size(); ++i) {
-    
+
     if ( currentLiveConnections[i].resistanceValue > MAX_ALLOWED_RESISTANCE_VALUE) {
       liveConnectionOffsets[i] = 0.0;
       continue;
@@ -57,8 +68,35 @@ void updateLiveConnectionOffsets() {
       liveConnectionOffsets[i] = 0.0;
     }
   }
+
+  applyLiveConnectionOffsets();
+
+  for (const auto& connection : allWireConnections) {
+    Serial.print("Resistance: ");
+    Serial.print(connection.resistanceValue);
+    Serial.print(", Red Port: ");
+    Serial.print(connection.redPort);
+    Serial.print(", Colour: ");
+    Serial.print(connection.colour);
+    Serial.print(", Black Port: ");
+    Serial.println(connection.blackPort);
+  }
 }
 
+
+void applyLiveConnectionOffsets() {
+  for (auto& connection : allWireConnections) {
+    if (connection.colour == 'r') {
+      connection.resistanceValue += liveConnectionOffsets[0];
+    } else if (connection.colour == 'g') {
+      connection.resistanceValue += liveConnectionOffsets[1];
+    } else if (connection.colour == 'b') {
+      connection.resistanceValue += liveConnectionOffsets[2];
+    } else if (connection.colour == 'y') {
+      connection.resistanceValue += liveConnectionOffsets[3];
+    }
+  }
+}
 
 bool compareByColourAndBlackPort(const wireConnection &wire1, const wireConnection &wire2) {
   if (wire1.colour != wire2.colour) {
@@ -93,8 +131,10 @@ float findAverageResistance(int sensorNumber, int numberOfTests, boolean redOffs
 
   float sumResistance = 0;
   for (int j = 0; j < numberOfTests; j++) {
-    sensorValues[sensorNumber] = analogRead(sensorPins[sensorNumber]);
-    Vouts[sensorNumber] = (Vin * sensorValues[sensorNumber]) / 1023.0;
+    //sensorValues[sensorNumber] = analogRead(sensorPins[sensorNumber]);
+    sensorValues[sensorNumber] = ads.readADC_SingleEnded(sensorNumber);
+    //Vouts[sensorNumber] = (Vin * sensorValues[sensorNumber]) / 1023.0;
+    Vouts[sensorNumber] = (Vin / 65535.0) * sensorValues[sensorNumber];
     float resistance = Rref * (1.0 / ((Vin / Vouts[sensorNumber]) - 1.0));
     sumResistance += resistance;
 

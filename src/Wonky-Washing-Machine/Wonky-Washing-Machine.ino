@@ -22,8 +22,6 @@ void setup() {
 
   setupPatternGame();
 
-  servoControllerSetup();
-
   delay(500);
   digitalWrite(SS_PIN_MATRIX, LOW);
   delay(500);
@@ -36,11 +34,18 @@ void setup() {
   setupActivation();
   digitalWrite(SS_PIN_RFID, HIGH);
 
-  delay(500);
-  digitalWrite(SS_PIN_RFID, LOW);
-  delay(500);
-  runActivation();
-  digitalWrite(SS_PIN_RFID, HIGH);
+  //while (checkButtonPressed() < 0);
+  //delay(10000);
+
+  servoControllerSetup();
+
+  setActivationLED("red");
+
+  //delay(500);
+  //digitalWrite(SS_PIN_RFID, LOW);
+  //delay(500);
+  //runActivation();
+  //digitalWrite(SS_PIN_RFID, HIGH);
 
   //runKnobs();
 

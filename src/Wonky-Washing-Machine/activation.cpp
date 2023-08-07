@@ -1,5 +1,5 @@
 #include "activation.h"
-#include <MFRC522.h>
+#include <mfrc522.h>
 
 /**
    @brief Flag indicating whether the activation process is complete.
@@ -27,7 +27,7 @@ void setupActivation() {
 
   mfrc522.PCD_Init();
 
-  setActivationLED("red");
+  setActivationLED("blue");
   delay(500);
 }
 

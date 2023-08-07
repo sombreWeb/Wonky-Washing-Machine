@@ -14,7 +14,7 @@ const int LIGHT_INTENSITY = 1;
 
 MD_MAX72XX mx = MD_MAX72XX(HARDWARE_TYPE, SS_PIN_MATRIX, NUM_LED_MATRICES);
 
-const float searchTolerance = 1000.0f;
+const float searchTolerance = 200.0f;
 
 int wiresGameLevel = 1;
 
@@ -27,13 +27,17 @@ std::vector<wireConnection> currentWireConnections;
 
 void setupWireGame()
 {
+  calibrationSetup();
   LevelData levelData = getLevelData(wiresGameLevel);
   solution = levelData.levelSolution;
   clue = levelData.clue;
   mx.begin();
   mx.control(MD_MAX72XX::INTENSITY, LIGHT_INTENSITY);
   delay(500);
-  updateLiveConnectionOffsets();
+  showClue("RGBYRGBY");
+  delay(500);
+  //updateLiveConnectionOffsets();
+  showClue("        ");
 }
 
 void runWiresGame()
@@ -155,11 +159,6 @@ bool compareByBlackPort(const wireConnection& connection1, const wireConnection&
 bool checkIfWiresCorrect() {
 
   currentWireConnections = getCurrentConnections();
-
-  // Add live offsets if they exist
-  for (int i = 0; i < currentWireConnections.size(); ++i) {
-    currentWireConnections[i].resistanceValue += liveConnectionOffsets[i];
-  }
 
   for (const wireConnection& solutionConnection : solution) {
 
