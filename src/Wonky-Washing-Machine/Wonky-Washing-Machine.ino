@@ -4,6 +4,12 @@
 #include "knobs_game.h"
 #include "pattern_game.h"
 #include "wires_game.h"
+#include "hub_controller.h"
+
+String mss = "{\"action\": \"action\","
+             "\"actionid\": \"setPatternGameLevel1\","
+             "\"deviceid\": \"cf29a - 44194 - abcdef\","
+             "\"roomid\": \"1\"}";
 
 void setup() {
   Serial.begin(9600);
@@ -39,21 +45,32 @@ void setup() {
 
   servoControllerSetup();
 
-  setActivationLED("red");
+  Serial.println(getRegisterStr("1"));
+  
+  //processMessage(mss);
 
-  //delay(500);
-  //digitalWrite(SS_PIN_RFID, LOW);
-  //delay(500);
-  //runActivation();
-  //digitalWrite(SS_PIN_RFID, HIGH);
+  runPuzzle();
+}
 
-  //runKnobs();
+void loop() {}
 
-  //openDoor(topServo);
+void runPuzzle() {
 
-  //runPatternGame();
+  Serial.println("running...");
 
-  //openDoor(sideServo);
+  delay(500);
+  digitalWrite(SS_PIN_RFID, LOW);
+  delay(500);
+  runActivation();
+  digitalWrite(SS_PIN_RFID, HIGH);
+
+  runKnobs();
+
+  openDoor(topServo);
+
+  runPatternGame();
+
+  openDoor(sideServo);
 
   //calibrateRedPorts();
   //calibrateWires();
@@ -67,18 +84,4 @@ void setup() {
   openDoor(bottomServo);
 
   Serial.print("done");
-}
-
-void loop() {}
-
-
-// Function to print the UID
-void printUID(byte* uid, byte uidSize) {
-  for (byte i = 0; i < uidSize; i++) {
-    if (uid[i] < 0x10) {
-      Serial.print("0");
-    }
-    Serial.print(uid[i], HEX);
-  }
-  Serial.println();
 }

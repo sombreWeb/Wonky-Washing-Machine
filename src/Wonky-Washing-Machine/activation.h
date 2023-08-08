@@ -19,5 +19,6 @@ void setupActivation();
 void runActivation();
 bool checkUIDMatch(byte* desiredUID);
 void setActivationLED(String colour);
+void printUID(byte* uid, byte uidSize);
 
 #endif

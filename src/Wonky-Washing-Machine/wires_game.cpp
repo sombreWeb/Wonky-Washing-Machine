@@ -64,7 +64,7 @@ void runWiresGame()
 
     printWireConnections(currentWireConnections);
     std::vector<wireConnection> currentConnections = readCurrentWireSetupCalibration(0, 0);
-    Serial.println("--------\\\///---------");
+    Serial.println("-------- Current Readings: (red ports only) ---------");
     printWireConnections(currentConnections);
 
 
@@ -108,6 +108,11 @@ void runWiresGame()
 
     wiresGameComplete = checkIfWiresCorrect();
   }
+
+  if (wiresGameComplete){
+    showClue("********");
+  }
+  
 }
 
 void showClue(String clue) {
@@ -180,7 +185,6 @@ bool checkIfWiresCorrect() {
   }
 
   Serial.println("correct");
-  showClue("********");
 
   return true;
 }

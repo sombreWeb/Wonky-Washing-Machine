@@ -35,11 +35,21 @@ void setupActivation() {
    @brief Runs the activation process.
 */
 void runActivation() {
+
+  mfrc522.PCD_Reset();
+  mfrc522.PCD_Init();
+  delay(500);
+
+  setActivationLED("red");
+  
   while (!activationComplete) {
     if (checkUIDMatch(desiredUID)) {
       activationComplete = true;
-      setActivationLED("green");
     }
+  }
+  
+  if (activationComplete) {
+    setActivationLED("green");
   }
 }
 
@@ -84,4 +94,16 @@ void setActivationLED(String colour) {
     digitalWrite(GREEN_PIN, LOW);
     digitalWrite(BLUE_PIN, LOW);
   }
+}
+
+
+// Function to print the UID
+void printUID(byte* uid, byte uidSize) {
+  for (byte i = 0; i < uidSize; i++) {
+    if (uid[i] < 0x10) {
+      Serial.print("0");
+    }
+    Serial.print(uid[i], HEX);
+  }
+  Serial.println();
 }

@@ -11,6 +11,9 @@ struct LevelData {
   String clue;
 };
 
+extern boolean wiresGameComplete;
+extern int wiresGameLevel;
+
 void showClue(String clue);
 bool checkIfWiresCorrect();
 LevelData getLevelData(int level);

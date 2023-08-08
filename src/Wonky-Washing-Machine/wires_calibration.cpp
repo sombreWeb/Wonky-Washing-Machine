@@ -20,7 +20,7 @@ const float redPortOffsets[numSensors] = {0.00, 0.0052, 0.0003, -0.0031};
 
 float liveConnectionOffsets[numSensors] = {0.00, 0.0, 0.0, 0.0};
 
-const int numberOfResistanceTests = 20;
+const int numberOfResistanceTests = 5;
 
 void calibrationSetup() {
   Wire.begin();
@@ -138,7 +138,7 @@ float findAverageResistance(int sensorNumber, int numberOfTests, boolean redOffs
     float resistance = Rref * (1.0 / ((Vin / Vouts[sensorNumber]) - 1.0));
     sumResistance += resistance;
 
-    delay(10);  // Delay to allow the ADC to stabilize between readings
+    //delay(10);  // Delay to allow the ADC to stabilize between readings
   }
   float averageResistance = sumResistance / numberOfTests;  // Calculate average resistance
   if (redOffsetOn) {

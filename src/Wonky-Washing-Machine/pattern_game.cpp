@@ -67,7 +67,7 @@ void setupPatternGame()
   FastLED.setBrightness(LED_BRIGHTNESS_PATTERN_GAME);
 
   fillLights("black");
-  
+
   delay(500);
 }
 
@@ -76,6 +76,8 @@ void setupPatternGame()
 */
 void runPatternGame()
 {
+  fillLights("black");
+  
   // Set game level
   int patternLength, patternIncrement, patternSpeed;
 
@@ -217,9 +219,12 @@ void runPatternGame()
         }
       }
     }
-
-    fillLights("green"); // Fill LEDs to green when the pattern game was completed successfully
+    
     patternGameComplete = true; // End the game
+  }
+
+  if (patternGameComplete){
+    fillLights("green"); // Fill LEDs to green when the pattern game was completed successfully
   }
 
   delete[] randomPattern; // Release the memory allocated for the random pattern array
