@@ -11,12 +11,25 @@ String mss = "{\"action\": \"action\","
              "\"deviceid\": \"cf29a - 44194 - abcdef\","
              "\"roomid\": \"1\"}";
 
+
+HubController hubController;
+
 void setup() {
+
   Serial.begin(9600);
+  Serial2.begin(9600);
+
+  delay(5000); // allow hub to connect to wifi
 
   randomSeed(analogRead(A0));
 
   SPI.begin();
+
+  String registerStr = hubController.getRegisterStr("1");
+  hubController.registerPuzzle(registerStr);
+  Serial.println(registerStr);
+  delay(5000);
+  hubController.checkHub();
 
   // Set SS pins as OUTPUT and HIGH (off)
   pinMode(SS_PIN_RFID, OUTPUT);
@@ -45,11 +58,7 @@ void setup() {
 
   servoControllerSetup();
 
-  Serial.println(getRegisterStr("1"));
-  
-  //processMessage(mss);
-
-  runPuzzle();
+  //runPuzzle();
 }
 
 void loop() {}
@@ -84,4 +93,12 @@ void runPuzzle() {
   openDoor(bottomServo);
 
   Serial.print("done");
+}
+
+void checkForReset() {
+
+  if (hubController.hubPuzzleResetRequest) {
+    hubController.hubPuzzleResetRequest = false;
+    runPuzzle();
+  }
 }

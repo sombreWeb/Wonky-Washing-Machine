@@ -3,10 +3,20 @@
 
 #include <ArduinoJson.h>
 
-void processMessage(String incomingMessage);
+class HubController {
+public:
 
-void addAction(JsonArray &actions, String actionId, String actionName, boolean enabled);
+    boolean hubPuzzleResetRequest = false;
 
-String getRegisterStr(String room);
+    void processMessage(String incomingMessage);
 
-#endif 
+    void addAction(JsonArray &actions, String actionId, String actionName, boolean enabled);
+
+    String getRegisterStr(String room);
+
+    void registerPuzzle(String registerStr);
+
+    void checkHub();
+};
+
+#endif

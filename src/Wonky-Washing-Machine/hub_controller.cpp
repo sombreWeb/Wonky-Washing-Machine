@@ -5,10 +5,14 @@
 #include "knobs_game.h"
 #include "pattern_game.h"
 #include "wires_game.h"
+#include "hub_controller.h"
 
-void processMessage(String incomingMessage) {
+const int bufferSize = 128; // Maximum string length
+char buffera[bufferSize];   // Buffer to hold received data
 
-  StaticJsonDocument<200> doc;
+void HubController::processMessage(String incomingMessage) {
+
+  StaticJsonDocument<2000> doc;
 
   DeserializationError error = deserializeJson(doc, incomingMessage);
 
@@ -70,7 +74,7 @@ void processMessage(String incomingMessage) {
       closeDoor(sideServo);
       closeDoor(bottomServo);
 
-      //runPuzzle();
+      hubPuzzleResetRequest = true;
     }
 
     if (actionid == "setPatternGameLevel1") {
@@ -100,16 +104,15 @@ void processMessage(String incomingMessage) {
   }
 }
 
-
-void addAction(JsonArray &actions, String actionId, String actionName, boolean enabled) {
+void HubController::addAction(JsonArray &actions, String actionId, String actionName, boolean enabled) {
   JsonObject actionObj = actions.createNestedObject();
   actionObj["actionid"] = actionId;
   actionObj["name"] = actionName;
   actionObj["enabled"] = enabled;
 }
 
-String getRegisterStr(String room) {
-  StaticJsonDocument<512> jsonDoc;
+String HubController::getRegisterStr(String room) {
+  StaticJsonDocument<2000> jsonDoc;
   jsonDoc["action"] = "register";
   jsonDoc["room"] = room;
   jsonDoc["name"] = "Wonky Washing Machine";
@@ -136,4 +139,32 @@ String getRegisterStr(String room) {
   serializeJson(jsonDoc, jsonString);
 
   return jsonString;
+}
+
+void HubController::registerPuzzle(String registerStr) {
+  Serial2.println(registerStr);
+  delay(1000);
+}
+
+void HubController::checkHub() {
+  if (Serial2.available()) {
+
+    //String command = Serial1.readStringUntil('\0');
+
+    int bytesRead = Serial2.readBytes(buffera, bufferSize - 1); // Read up to bufferSize - 1 bytes
+    Serial.println(bytesRead);
+    buffera[bytesRead] = '\0'; // Null-terminate the received data
+
+    //if (bytesRead > 0) {
+    // Print the received command
+    Serial.println("Received command:");
+    Serial.println(buffera);
+
+
+    //Serial.println("------- Command received -------");
+    //Serial.println(command);
+    //processMessage(command);
+    // }
+    delay(100);
+  }
 }

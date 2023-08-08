@@ -21,6 +21,7 @@ MFRC522 mfrc522(SS_PIN_RFID, RST_PIN_RFID);
    @brief Initializes the activation setup.
 */
 void setupActivation() {
+  
   pinMode(RED_PIN, OUTPUT);
   pinMode(GREEN_PIN, OUTPUT);
   pinMode(BLUE_PIN, OUTPUT);
