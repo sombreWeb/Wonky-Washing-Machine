@@ -6,30 +6,20 @@
 #include "wires_game.h"
 #include "hub_controller.h"
 
-String mss = "{\"action\": \"action\","
-             "\"actionid\": \"setPatternGameLevel1\","
-             "\"deviceid\": \"cf29a - 44194 - abcdef\","
-             "\"roomid\": \"1\"}";
-
-
 HubController hubController;
 
 void setup() {
 
+  Serial.println("Setting up puzzle...");
+
   Serial.begin(9600);
   Serial2.begin(9600);
-
-  delay(5000); // allow hub to connect to wifi
 
   randomSeed(analogRead(A0));
 
   SPI.begin();
 
-  String registerStr = hubController.getRegisterStr("1");
-  hubController.registerPuzzle(registerStr);
-  Serial.println(registerStr);
-  delay(5000);
-  hubController.checkHub();
+  hubController.setupHub();
 
   // Set SS pins as OUTPUT and HIGH (off)
   pinMode(SS_PIN_RFID, OUTPUT);
@@ -58,28 +48,34 @@ void setup() {
 
   servoControllerSetup();
 
-  //runPuzzle();
+  runPuzzle();
 }
 
 void loop() {}
 
 void runPuzzle() {
 
-  Serial.println("running...");
+  Serial.println("Running puzzle...");
+  hubController.checkHub();
 
   delay(500);
   digitalWrite(SS_PIN_RFID, LOW);
   delay(500);
   runActivation();
   digitalWrite(SS_PIN_RFID, HIGH);
+  hubController.checkHub();
 
   runKnobs();
+  hubController.checkHub();
 
   openDoor(topServo);
+  hubController.checkHub();
 
   runPatternGame();
+  hubController.checkHub();
 
   openDoor(sideServo);
+  hubController.checkHub();
 
   //calibrateRedPorts();
   //calibrateWires();
@@ -88,11 +84,13 @@ void runPuzzle() {
   digitalWrite(SS_PIN_MATRIX, LOW);
   delay(500);
   runWiresGame();
+  hubController.checkHub();
   digitalWrite(SS_PIN_MATRIX, HIGH);
 
   openDoor(bottomServo);
+  hubController.checkHub();
 
-  Serial.print("done");
+  Serial.print("Puzzle complete!");
 }
 
 void checkForReset() {

@@ -7,18 +7,73 @@
 #include "wires_game.h"
 #include "hub_controller.h"
 
-const int bufferSize = 128; // Maximum string length
-char buffera[bufferSize];   // Buffer to hold received data
+
+/*
+   NOTE" On the Arduino mega you need to manually change the internal RX and TX buffer sizes.
+*/
+
+String registerRoomId = "1";
+
+boolean wifiConnected = false;
+boolean serverHubConnected = false;
+boolean serverHubRegistered = false;
+
+void HubController::setupHub() {
+  Serial.println("Setting up wifi...");
+  while (!wifiConnected) {
+    Serial2.println("wifiStatus");
+    delay(500);
+    checkHub();
+  }
+  Serial.println("Wifi connected!");
+
+  Serial.println("Setting up server hub...");
+  while (!serverHubConnected) {
+    Serial2.println("serverHubStatus");
+    delay(500);
+    checkHub();
+  }
+  Serial.println("Server hub connected!");
+
+  Serial.println("Registering with server hub...");
+  while (!serverHubRegistered) {
+    String registerStr = getRegisterStr(registerRoomId);
+    Serial2.println(registerStr);
+    delay(5000);
+    checkHub();
+  }
+  Serial.println("Registered with server hub!");
+}
 
 void HubController::processMessage(String incomingMessage) {
 
-  StaticJsonDocument<2000> doc;
+  if (incomingMessage == "wifi-connected") {
+    wifiConnected = true;
+    return;
+  }
 
+  if (incomingMessage == "serverHub-connected") {
+    serverHubConnected = true;
+    return;
+  }
+
+  // Process Jsons
+  StaticJsonDocument<2000> doc;
   DeserializationError error = deserializeJson(doc, incomingMessage);
 
   if (error) {
     Serial.print("Parsing failed: ");
     Serial.println(error.c_str());
+    return;
+  }
+
+  String responseError = doc["error"];
+  String responseMessage = doc["message"];
+  String responseType = doc["type"];
+  String responseDeviceId = doc["deviceid"];
+
+  if (responseError == "false" && responseMessage == "" && responseType == "" && responseDeviceId.length() > 0) {
+    serverHubRegistered = true;
     return;
   }
 
@@ -28,7 +83,6 @@ void HubController::processMessage(String incomingMessage) {
   String roomid = doc["roomid"];
 
   if (action == "action") {
-
     if (actionid == "openAllDoors") {
       openDoor(topServo);
       openDoor(sideServo);
@@ -42,6 +96,7 @@ void HubController::processMessage(String incomingMessage) {
     }
 
     if (actionid == "completeAll") {
+      Serial.println("All complete");
       activationComplete = true;
       knobs_complete = true;
       patternGameComplete = true;
@@ -104,7 +159,7 @@ void HubController::processMessage(String incomingMessage) {
   }
 }
 
-void HubController::addAction(JsonArray &actions, String actionId, String actionName, boolean enabled) {
+void HubController::addAction(JsonArray & actions, String actionId, String actionName, boolean enabled) {
   JsonObject actionObj = actions.createNestedObject();
   actionObj["actionid"] = actionId;
   actionObj["name"] = actionName;
@@ -141,30 +196,16 @@ String HubController::getRegisterStr(String room) {
   return jsonString;
 }
 
-void HubController::registerPuzzle(String registerStr) {
-  Serial2.println(registerStr);
-  delay(1000);
-}
-
 void HubController::checkHub() {
+
   if (Serial2.available()) {
 
-    //String command = Serial1.readStringUntil('\0');
+    String command = Serial2.readStringUntil('\n');
+    command.trim();
 
-    int bytesRead = Serial2.readBytes(buffera, bufferSize - 1); // Read up to bufferSize - 1 bytes
-    Serial.println(bytesRead);
-    buffera[bytesRead] = '\0'; // Null-terminate the received data
-
-    //if (bytesRead > 0) {
-    // Print the received command
-    Serial.println("Received command:");
-    Serial.println(buffera);
-
-
-    //Serial.println("------- Command received -------");
-    //Serial.println(command);
-    //processMessage(command);
-    // }
-    delay(100);
+    Serial.print("Command received --- ");
+    Serial.println(command);
+    processMessage(command);
   }
+  delay(100);
 }

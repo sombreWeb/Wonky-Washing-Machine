@@ -3,9 +3,9 @@
 
 #include <Servo.h>
 
-#define RELAY_PIN A9
-#define TOP_SERVO 7
-#define SIDE_SERVO 6
+#define RELAY_PIN 2
+#define TOP_SERVO 3
+#define SIDE_SERVO 4
 #define BOTTOM_SERVO 5
 
 struct ServoDetails {
