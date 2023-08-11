@@ -28,9 +28,6 @@ std::vector<wireConnection> currentWireConnections;
 void setupWireGame()
 {
   calibrationSetup();
-  LevelData levelData = getLevelData(wiresGameLevel);
-  solution = levelData.levelSolution;
-  clue = levelData.clue;
   mx.begin();
   mx.control(MD_MAX72XX::INTENSITY, LIGHT_INTENSITY);
   delay(500);
@@ -42,6 +39,7 @@ void setupWireGame()
 
 void runWiresGame()
 {
+
   boolean displayBaseClueFlag = true;
   unsigned long baseClueDuration = 15000;
   unsigned long colourClueDuration = 3000;
@@ -51,6 +49,10 @@ void runWiresGame()
   boolean isFirstAction = true;
   boolean lastActionWasShowClue = false;
   boolean lastActionWasFlashColours = false;
+
+  LevelData levelData = getLevelData(wiresGameLevel);
+  solution = levelData.levelSolution;
+  clue = levelData.clue;
 
   // Diable colour clues for level one
   if (wiresGameLevel == 1) {
@@ -109,10 +111,10 @@ void runWiresGame()
     wiresGameComplete = checkIfWiresCorrect();
   }
 
-  if (wiresGameComplete){
+  if (wiresGameComplete) {
     showClue("********");
   }
-  
+
 }
 
 void showClue(String clue) {

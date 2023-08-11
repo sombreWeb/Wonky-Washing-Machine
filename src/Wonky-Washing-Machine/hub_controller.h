@@ -14,13 +14,13 @@ public:
 
     void addAction(JsonArray &actions, String actionId, String actionName, boolean enabled);
 
-    void generateRegistrationJson(String room);
-
-    String getRegisterStr();
+    void generateRegistrationJson(String room, String statusStr);
 
     void checkHub();
 
     bool isValidJSON(String jsonString);
+
+    void updateStatus(String room, String statusStr);
 };
 
 #endif

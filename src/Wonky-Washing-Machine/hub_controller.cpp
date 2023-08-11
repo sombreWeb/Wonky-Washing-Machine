@@ -24,7 +24,7 @@ int timeBetweenRegisterCheck = 10000;
 
 int invalidBufferRetry = 50;
 
-StaticJsonDocument<1500> registrationJson;
+String registrationJson;
 
 void HubController::setupHub() {
 
@@ -46,16 +46,25 @@ void HubController::setupHub() {
 
   Serial.println("Registering with server hub...");
   while (!serverHubRegistered) {
-    generateRegistrationJson(registerRoomId);
-    String registerStr = getRegisterStr();
+    generateRegistrationJson(registerRoomId, "Ready to start");
     Serial.print("Register string sent: ");
-    Serial.println(registerStr);
-    Serial2.println(registerStr);
+    Serial.println(registrationJson);
+    Serial2.println(registrationJson);
     delay(timeBetweenRegisterCheck);
     checkHub();
   }
   Serial.println("Registered with server hub!");
-  registrationJson["action"] = "update";
+
+  // Change to update
+  StaticJsonDocument<1500> doc;
+  DeserializationError error = deserializeJson(doc, registrationJson);
+  if (error) {
+    Serial.print("Error parsing JSON: ");
+    Serial.println(error.c_str());
+    return;
+  }
+  doc["action"] = "update";
+  serializeJson(doc, registrationJson);
 }
 
 void HubController::processMessage(String jsonString) {
@@ -80,7 +89,7 @@ void HubController::processMessage(String jsonString) {
   if (serverHubConnectedJson == "serverHub-connected") {
     serverHubConnected = "true";
     return;
-  }
+  } 
 
   String errorJson = doc["error"];
   String messageJson = doc["message"];
@@ -98,6 +107,7 @@ void HubController::processMessage(String jsonString) {
   String roomidJson = doc["roomid"];
 
   if (actionJson == "action") {
+
     if (actionidJson == "openAllDoors") {
       openDoor(topServo);
       openDoor(sideServo);
@@ -180,14 +190,18 @@ void HubController::addAction(JsonArray & actions, String actionId, String actio
   actionObj["enabled"] = enabled;
 }
 
-void HubController::generateRegistrationJson(String room) {
+void HubController::generateRegistrationJson(String room, String statusStr) {
 
-  registrationJson["action"] = "register";
-  registrationJson["room"] = room;
-  registrationJson["name"] = "Wonky Washing Machine";
-  registrationJson["status"] = "Ready to Start";
+  registrationJson = "";
+  
+  StaticJsonDocument<1500> doc;
 
-  JsonArray actionsArray = registrationJson.createNestedArray("actions");
+  doc["action"] = "register";
+  doc["room"] = room;
+  doc["name"] = "Wonky Washing Machine";
+  doc["status"] = statusStr;
+
+  JsonArray actionsArray = doc.createNestedArray("actions");
 
   addAction(actionsArray, "openAllDoors", "Open All Doors", true);
   addAction(actionsArray, "closeAllDoors", "Close All Doors", true);
@@ -203,13 +217,13 @@ void HubController::generateRegistrationJson(String room) {
   addAction(actionsArray, "setWiresGameLevel1", "Set Wires Game Level 1", true);
   addAction(actionsArray, "setWiresGameLevel2", "Set Wires Game Level 2", true);
   addAction(actionsArray, "setWiresGameLevel3", "Set Wires Game Level 3", true);
+
+  serializeJson(doc, registrationJson);
 }
 
-String HubController::getRegisterStr() {
-  String jsonString;
-  serializeJson(registrationJson, jsonString);
-
-  return jsonString;
+void HubController::updateStatus(String room, String statusStr){
+  generateRegistrationJson(room, statusStr);
+  Serial2.println(registrationJson);
 }
 
 bool HubController::isValidJSON(String jsonString) {
