@@ -24,7 +24,7 @@ int timeBetweenRegisterCheck = 10000;
 
 int invalidBufferRetry = 50;
 
-StaticJsonDocument<2000> registrationJson;
+StaticJsonDocument<1500> registrationJson;
 
 void HubController::setupHub() {
 
@@ -55,6 +55,7 @@ void HubController::setupHub() {
     checkHub();
   }
   Serial.println("Registered with server hub!");
+  registrationJson["action"] = "update";
 }
 
 void HubController::processMessage(String jsonString) {
@@ -90,7 +91,7 @@ void HubController::processMessage(String jsonString) {
     serverHubRegistered = true;
     return;
   }
-  
+
   String actionJson = doc["action"];
   String actionidJson = doc["actionid"];
   String deviceidJson = doc["deviceid"];
@@ -169,7 +170,6 @@ void HubController::processMessage(String jsonString) {
     if (actionidJson == "setWiresGameLevel3") {
       wiresGameLevel = 3;
     }
-
   }
 }
 

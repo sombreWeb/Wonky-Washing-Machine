@@ -117,6 +117,12 @@ void loop() {
       client.send(receivedCommand);
       serverHubRegistered = true;
     }
+
+    // Update handler
+    if (jsonDoc.containsKey("action") && jsonDoc["action"].as<String>() == "update") {
+      Serial.println("Received 'update' command");
+      client.send(receivedCommand);
+    }
   }
 
   delay(500);
