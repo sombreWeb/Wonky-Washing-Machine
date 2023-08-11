@@ -48,10 +48,14 @@ void setup() {
 
   servoControllerSetup();
 
-  runPuzzle();
+  Serial.println("----- Puzzle setup complete -----");
+
+  //runPuzzle();
 }
 
-void loop() {}
+void loop() {
+  hubController.checkHub();
+  }
 
 void runPuzzle() {
 

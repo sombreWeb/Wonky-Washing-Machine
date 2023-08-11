@@ -10,13 +10,15 @@ public:
 
     void setupHub();
 
-    void processMessage(String incomingMessage);
+    void processMessage(String jsonString);
 
     void addAction(JsonArray &actions, String actionId, String actionName, boolean enabled);
 
     String getRegisterStr(String room);
 
     void checkHub();
+
+    bool isValidJSON(String jsonString);
 };
 
 #endif

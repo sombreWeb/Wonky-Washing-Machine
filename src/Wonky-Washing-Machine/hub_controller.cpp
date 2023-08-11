@@ -18,11 +18,14 @@ boolean wifiConnected = false;
 boolean serverHubConnected = false;
 boolean serverHubRegistered = false;
 
+int invalidBufferRetry = 50;
+
 void HubController::setupHub() {
+
   Serial.println("Setting up wifi...");
   while (!wifiConnected) {
     Serial2.println("wifiStatus");
-    delay(500);
+    delay(2000);
     checkHub();
   }
   Serial.println("Wifi connected!");
@@ -30,7 +33,7 @@ void HubController::setupHub() {
   Serial.println("Setting up server hub...");
   while (!serverHubConnected) {
     Serial2.println("serverHubStatus");
-    delay(500);
+    delay(2000);
     checkHub();
   }
   Serial.println("Server hub connected!");
@@ -38,64 +41,68 @@ void HubController::setupHub() {
   Serial.println("Registering with server hub...");
   while (!serverHubRegistered) {
     String registerStr = getRegisterStr(registerRoomId);
+    Serial.print("Register string sent: ");
+    Serial.println(registerStr);
     Serial2.println(registerStr);
-    delay(5000);
+    delay(10000);
     checkHub();
   }
   Serial.println("Registered with server hub!");
 }
 
-void HubController::processMessage(String incomingMessage) {
+void HubController::processMessage(String jsonString) {
 
-  if (incomingMessage == "wifi-connected") {
-    wifiConnected = true;
-    return;
-  }
+  StaticJsonDocument<2000> jsonDoc;
+  DeserializationError error = deserializeJson(jsonDoc, jsonString);
 
-  if (incomingMessage == "serverHub-connected") {
-    serverHubConnected = true;
-    return;
-  }
-
-  // Process Jsons
-  StaticJsonDocument<2000> doc;
-  DeserializationError error = deserializeJson(doc, incomingMessage);
-
-  if (error) {
-    Serial.print("Parsing failed: ");
+  if (error){
+    Serial.print("JSON Deserialization Error: ");
     Serial.println(error.c_str());
     return;
   }
 
-  String responseError = doc["error"];
-  String responseMessage = doc["message"];
-  String responseType = doc["type"];
-  String responseDeviceId = doc["deviceid"];
+  String wifiConnectedJson = jsonDoc["wifiConnected"];
+  String serverHubConnectedJson = jsonDoc["serverHubConnected"];
 
-  if (responseError == "false" && responseMessage == "" && responseType == "" && responseDeviceId.length() > 0) {
+  if (wifiConnectedJson == "wifi-connected") {
+    wifiConnected = "true";
+    return;
+  }
+
+  if (serverHubConnectedJson == "serverHub-connected") {
+    serverHubConnected = "true";
+    return;
+  }
+
+  String errorJson = jsonDoc["error"];
+  String messageJson = jsonDoc["message"];
+  String typeJson = jsonDoc["type"];
+  String deviceIdJson = jsonDoc["deviceid"];
+
+  if (errorJson == "false" && messageJson == "" && typeJson == "" && deviceIdJson.length() > 0) {
     serverHubRegistered = true;
     return;
   }
 
-  String action = doc["action"];
-  String actionid = doc["actionid"];
-  String deviceid = doc["deviceid"];
-  String roomid = doc["roomid"];
+  String actionJson = jsonDoc["action"];
+  String actionidJson = jsonDoc["actionid"];
+  String deviceidJson = jsonDoc["deviceid"];
+  String roomidJson = jsonDoc["roomid"];
 
-  if (action == "action") {
-    if (actionid == "openAllDoors") {
+  if (actionJson == "action") {
+    if (actionidJson == "openAllDoors") {
       openDoor(topServo);
       openDoor(sideServo);
       openDoor(bottomServo);
     }
 
-    if (actionid == "closeAllDoors") {
+    if (actionidJson == "closeAllDoors") {
       closeDoor(topServo);
       closeDoor(sideServo);
       closeDoor(bottomServo);
     }
 
-    if (actionid == "completeAll") {
+    if (actionidJson == "completeAll") {
       Serial.println("All complete");
       activationComplete = true;
       knobs_complete = true;
@@ -103,23 +110,23 @@ void HubController::processMessage(String incomingMessage) {
       wiresGameComplete = true;
     }
 
-    if (actionid == "completeActivation") {
+    if (actionidJson == "completeActivation") {
       activationComplete = true;
     }
 
-    if (actionid == "completeKnobsGame") {
+    if (actionidJson == "completeKnobsGame") {
       knobs_complete = true;
     }
 
-    if (actionid == "completePatternGame") {
+    if (actionidJson == "completePatternGame") {
       patternGameComplete = true;
     }
 
-    if (actionid == "completeWireGame") {
+    if (actionidJson == "completeWireGame") {
       wiresGameComplete = true;
     }
 
-    if (actionid == "resetPuzzle") {
+    if (actionidJson == "resetPuzzle") {
       activationComplete = false;
       knobs_complete = false;
       patternGameComplete = false;
@@ -132,27 +139,27 @@ void HubController::processMessage(String incomingMessage) {
       hubPuzzleResetRequest = true;
     }
 
-    if (actionid == "setPatternGameLevel1") {
+    if (actionidJson == "setPatternGameLevel1") {
       patternGameLevel = 1;
     }
 
-    if (actionid == "setPatternGameLevel2") {
+    if (actionidJson == "setPatternGameLevel2") {
       patternGameLevel = 2;
     }
 
-    if (actionid == "setPatternGameLevel3") {
+    if (actionidJson == "setPatternGameLevel3") {
       patternGameLevel = 3;
     }
 
-    if (actionid == "setWiresGameLevel1") {
+    if (actionidJson == "setWiresGameLevel1") {
       wiresGameLevel = 1;
     }
 
-    if (actionid == "setWiresGameLevel2") {
+    if (actionidJson == "setWiresGameLevel2") {
       wiresGameLevel = 2;
     }
 
-    if (actionid == "setWiresGameLevel3") {
+    if (actionidJson == "setWiresGameLevel3") {
       wiresGameLevel = 3;
     }
 
@@ -175,20 +182,20 @@ String HubController::getRegisterStr(String room) {
 
   JsonArray actionsArray = jsonDoc.createNestedArray("actions");
 
-  addAction(actionsArray, "openAllDoors", "Open All Doors", false);
-  addAction(actionsArray, "closeAllDoors", "Close All Doors", false);
-  addAction(actionsArray, "completeAll", "Complete All", false);
-  addAction(actionsArray, "completeActivation", "Complete Activation", false);
-  addAction(actionsArray, "completeKnobsGame", "Complete Knobs Game", false);
-  addAction(actionsArray, "completePatternGame", "Complete Pattern Game", false);
-  addAction(actionsArray, "completeWireGame", "Complete Wire Game", false);
-  addAction(actionsArray, "resetPuzzle", "Reset Puzzle", false);
-  addAction(actionsArray, "setPatternGameLevel1", "Set Pattern Game Level 1", false);
-  addAction(actionsArray, "setPatternGameLevel2", "Set Pattern Game Level 2", false);
-  addAction(actionsArray, "setPatternGameLevel3", "Set Pattern Game Level 3", false);
-  addAction(actionsArray, "setWiresGameLevel1", "Set Wires Game Level 1", false);
-  addAction(actionsArray, "setWiresGameLevel2", "Set Wires Game Level 2", false);
-  addAction(actionsArray, "setWiresGameLevel3", "Set Wires Game Level 3", false);
+  addAction(actionsArray, "openAllDoors", "Open All Doors", true);
+  addAction(actionsArray, "closeAllDoors", "Close All Doors", true);
+  addAction(actionsArray, "completeAll", "Complete All", true);
+  addAction(actionsArray, "completeActivation", "Complete Activation", true);
+  addAction(actionsArray, "completeKnobsGame", "Complete Knobs Game", true);
+  addAction(actionsArray, "completePatternGame", "Complete Pattern Game", true);
+  addAction(actionsArray, "completeWireGame", "Complete Wire Game", true);
+  addAction(actionsArray, "resetPuzzle", "Reset Puzzle", true);
+  addAction(actionsArray, "setPatternGameLevel1", "Set Pattern Game Level 1", true);
+  addAction(actionsArray, "setPatternGameLevel2", "Set Pattern Game Level 2", true);
+  addAction(actionsArray, "setPatternGameLevel3", "Set Pattern Game Level 3", true);
+  addAction(actionsArray, "setWiresGameLevel1", "Set Wires Game Level 1", true);
+  addAction(actionsArray, "setWiresGameLevel2", "Set Wires Game Level 2", true);
+  addAction(actionsArray, "setWiresGameLevel3", "Set Wires Game Level 3", true);
 
   String jsonString;
   serializeJson(jsonDoc, jsonString);
@@ -196,16 +203,37 @@ String HubController::getRegisterStr(String room) {
   return jsonString;
 }
 
+bool HubController::isValidJSON(String jsonString) {
+  StaticJsonDocument<200> doc;
+  DeserializationError error = deserializeJson(doc, jsonString);
+  return error == DeserializationError::Ok;
+}
+
 void HubController::checkHub() {
 
   if (Serial2.available()) {
 
-    String command = Serial2.readStringUntil('\n');
-    command.trim();
+    for (int attemptIdx = 0; attemptIdx < invalidBufferRetry; attemptIdx++) {
 
-    Serial.print("Command received --- ");
-    Serial.println(command);
-    processMessage(command);
+      String command = Serial2.readStringUntil('\n');
+      command.trim();
+
+      Serial.print("Raw command receieved: ");
+      Serial.println(command);
+
+      boolean isValidJsonString = isValidJSON(command);
+
+      if (isValidJsonString) {
+        processMessage(command);
+        Serial.print("REAL Command received --- ");
+        Serial.println(command);
+        break;
+      } else {
+        Serial.print("Proto Command received --- ");
+        Serial.println(command);
+        Serial2.println("resend");
+        continue;
+      }
+    }
   }
-  delay(100);
 }
