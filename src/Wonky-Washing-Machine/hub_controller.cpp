@@ -18,14 +18,20 @@ boolean wifiConnected = false;
 boolean serverHubConnected = false;
 boolean serverHubRegistered = false;
 
+int timeBetweenWifiConnectionCheck = 2000;
+int timeBetweenServerHubConnectionCheck = 2000;
+int timeBetweenRegisterCheck = 10000;
+
 int invalidBufferRetry = 50;
+
+StaticJsonDocument<2000> registrationJson;
 
 void HubController::setupHub() {
 
   Serial.println("Setting up wifi...");
   while (!wifiConnected) {
     Serial2.println("wifiStatus");
-    delay(2000);
+    delay(timeBetweenWifiConnectionCheck);
     checkHub();
   }
   Serial.println("Wifi connected!");
@@ -33,18 +39,19 @@ void HubController::setupHub() {
   Serial.println("Setting up server hub...");
   while (!serverHubConnected) {
     Serial2.println("serverHubStatus");
-    delay(2000);
+    delay(timeBetweenServerHubConnectionCheck);
     checkHub();
   }
   Serial.println("Server hub connected!");
 
   Serial.println("Registering with server hub...");
   while (!serverHubRegistered) {
-    String registerStr = getRegisterStr(registerRoomId);
+    generateRegistrationJson(registerRoomId);
+    String registerStr = getRegisterStr();
     Serial.print("Register string sent: ");
     Serial.println(registerStr);
     Serial2.println(registerStr);
-    delay(10000);
+    delay(timeBetweenRegisterCheck);
     checkHub();
   }
   Serial.println("Registered with server hub!");
@@ -52,17 +59,17 @@ void HubController::setupHub() {
 
 void HubController::processMessage(String jsonString) {
 
-  StaticJsonDocument<2000> jsonDoc;
-  DeserializationError error = deserializeJson(jsonDoc, jsonString);
+  StaticJsonDocument<500> doc;
+  DeserializationError error = deserializeJson(doc, jsonString);
 
-  if (error){
+  if (error) {
     Serial.print("JSON Deserialization Error: ");
     Serial.println(error.c_str());
     return;
   }
 
-  String wifiConnectedJson = jsonDoc["wifiConnected"];
-  String serverHubConnectedJson = jsonDoc["serverHubConnected"];
+  String wifiConnectedJson = doc["wifiConnected"];
+  String serverHubConnectedJson = doc["serverHubConnected"];
 
   if (wifiConnectedJson == "wifi-connected") {
     wifiConnected = "true";
@@ -74,20 +81,20 @@ void HubController::processMessage(String jsonString) {
     return;
   }
 
-  String errorJson = jsonDoc["error"];
-  String messageJson = jsonDoc["message"];
-  String typeJson = jsonDoc["type"];
-  String deviceIdJson = jsonDoc["deviceid"];
+  String errorJson = doc["error"];
+  String messageJson = doc["message"];
+  String typeJson = doc["type"];
+  String deviceIdJson = doc["deviceid"];
 
   if (errorJson == "false" && messageJson == "" && typeJson == "" && deviceIdJson.length() > 0) {
     serverHubRegistered = true;
     return;
   }
-
-  String actionJson = jsonDoc["action"];
-  String actionidJson = jsonDoc["actionid"];
-  String deviceidJson = jsonDoc["deviceid"];
-  String roomidJson = jsonDoc["roomid"];
+  
+  String actionJson = doc["action"];
+  String actionidJson = doc["actionid"];
+  String deviceidJson = doc["deviceid"];
+  String roomidJson = doc["roomid"];
 
   if (actionJson == "action") {
     if (actionidJson == "openAllDoors") {
@@ -173,14 +180,14 @@ void HubController::addAction(JsonArray & actions, String actionId, String actio
   actionObj["enabled"] = enabled;
 }
 
-String HubController::getRegisterStr(String room) {
-  StaticJsonDocument<2000> jsonDoc;
-  jsonDoc["action"] = "register";
-  jsonDoc["room"] = room;
-  jsonDoc["name"] = "Wonky Washing Machine";
-  jsonDoc["status"] = "Ready to Start";
+void HubController::generateRegistrationJson(String room) {
 
-  JsonArray actionsArray = jsonDoc.createNestedArray("actions");
+  registrationJson["action"] = "register";
+  registrationJson["room"] = room;
+  registrationJson["name"] = "Wonky Washing Machine";
+  registrationJson["status"] = "Ready to Start";
+
+  JsonArray actionsArray = registrationJson.createNestedArray("actions");
 
   addAction(actionsArray, "openAllDoors", "Open All Doors", true);
   addAction(actionsArray, "closeAllDoors", "Close All Doors", true);
@@ -196,15 +203,17 @@ String HubController::getRegisterStr(String room) {
   addAction(actionsArray, "setWiresGameLevel1", "Set Wires Game Level 1", true);
   addAction(actionsArray, "setWiresGameLevel2", "Set Wires Game Level 2", true);
   addAction(actionsArray, "setWiresGameLevel3", "Set Wires Game Level 3", true);
+}
 
+String HubController::getRegisterStr() {
   String jsonString;
-  serializeJson(jsonDoc, jsonString);
+  serializeJson(registrationJson, jsonString);
 
   return jsonString;
 }
 
 bool HubController::isValidJSON(String jsonString) {
-  StaticJsonDocument<200> doc;
+  StaticJsonDocument<500> doc;
   DeserializationError error = deserializeJson(doc, jsonString);
   return error == DeserializationError::Ok;
 }

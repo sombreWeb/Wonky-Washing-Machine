@@ -14,7 +14,9 @@ public:
 
     void addAction(JsonArray &actions, String actionId, String actionName, boolean enabled);
 
-    String getRegisterStr(String room);
+    void generateRegistrationJson(String room);
+
+    String getRegisterStr();
 
     void checkHub();
 
