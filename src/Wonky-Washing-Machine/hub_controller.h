@@ -6,6 +6,8 @@
 class HubController {
 public:
 
+    boolean hubEnabled = true;
+
     boolean hubPuzzleResetRequest = false;
 
     void setupHub();

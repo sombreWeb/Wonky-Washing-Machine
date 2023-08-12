@@ -6,10 +6,10 @@
 #define LEDS_DATA_PIN 23      // Data pin for the LED strip
 #define NUM_LEDS 4           // Number of LEDs in the strip
 
-#define BUTTON_PIN_RED 25     // Pin for the red button
-#define BUTTON_PIN_GREEN 27   // Pin for the green button
-#define BUTTON_PIN_BLUE 29   // Pin for the blue button
-#define BUTTON_PIN_YELLOW 31 // Pin for the yellow button
+#define BUTTON_PIN_RED 31     // Pin for the red button
+#define BUTTON_PIN_GREEN 29   // Pin for the green button
+#define BUTTON_PIN_BLUE 27   // Pin for the blue button
+#define BUTTON_PIN_YELLOW 25 // Pin for the yellow button
 
 extern int patternGameLevel;      // Level for the pattern game
 extern bool patternGameComplete;  // Flag to track the completion of the pattern game

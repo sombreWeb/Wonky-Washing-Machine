@@ -10,6 +10,8 @@ HubController hubController;
 
 void setup() {
 
+  hubController.hubEnabled = false;
+
   Serial.println("Setting up puzzle...");
 
   Serial.begin(9600);
@@ -50,7 +52,7 @@ void setup() {
 
   Serial.println("----- Puzzle setup complete -----");
 
-  //runPuzzle();
+  runPuzzle();
 }
 
 void loop() {
@@ -65,20 +67,20 @@ void runPuzzle() {
   delay(500);
   digitalWrite(SS_PIN_RFID, LOW);
   delay(500);
-  runActivation();
+  //runActivation();
   digitalWrite(SS_PIN_RFID, HIGH);
   hubController.checkHub();
 
-  runKnobs();
+  //runKnobs();
   hubController.checkHub();
 
-  openDoor(topServo);
+  //openDoor(topServo);
   hubController.checkHub();
 
-  runPatternGame();
+  //runPatternGame();
   hubController.checkHub();
 
-  openDoor(sideServo);
+  //openDoor(sideServo);
   hubController.checkHub();
 
   //calibrateRedPorts();

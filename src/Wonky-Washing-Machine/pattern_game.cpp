@@ -4,7 +4,7 @@
 /**
    Level for the pattern game.
 */
-int patternGameLevel = 1;
+int patternGameLevel = 3;
 
 /**
    Flag to track the completion of the pattern game.
@@ -32,7 +32,7 @@ const int patternIncrementLevel3 = 3;
 */
 const int patternSpeedLevel1 = 1000;
 const int patternSpeedLevel2 = 1000;
-const int patternSpeedLevel3 = 1000;
+const int patternSpeedLevel3 = 750;
 
 /**
    Hex values for colours.

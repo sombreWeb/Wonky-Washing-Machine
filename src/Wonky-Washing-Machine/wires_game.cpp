@@ -16,7 +16,7 @@ MD_MAX72XX mx = MD_MAX72XX(HARDWARE_TYPE, SS_PIN_MATRIX, NUM_LED_MATRICES);
 
 const float searchTolerance = 200.0f;
 
-int wiresGameLevel = 1;
+int wiresGameLevel = 3;
 
 bool wiresGameComplete = false;
 
@@ -218,13 +218,13 @@ LevelData getLevelData(int level) {
       };
       break;
     case 3:
-      // solve message: C9B6 H3DE +-1
-      levelData.clue = "C9B6H3DE";
+      // solve message: C8B6 I34G +1
+      levelData.clue = "C8B6I34G";
       levelData.levelSolution =
       {
-        {0, 0, 'g', 1},
-        {0, 1, 'r', 2},
-        {0, 2, 'y', 0},
+        {0, 0, 'r', 1},
+        {0, 1, 'y', 2},
+        {0, 2, 'g', 0},
         {0, 3, 'b', 3}
       };
       break;

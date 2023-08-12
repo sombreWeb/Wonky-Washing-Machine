@@ -28,6 +28,10 @@ String registrationJson;
 
 void HubController::setupHub() {
 
+  if (!hubEnabled) {
+    return;
+  }
+
   Serial.println("Setting up wifi...");
   while (!wifiConnected) {
     Serial2.println("wifiStatus");
@@ -89,7 +93,7 @@ void HubController::processMessage(String jsonString) {
   if (serverHubConnectedJson == "serverHub-connected") {
     serverHubConnected = "true";
     return;
-  } 
+  }
 
   String errorJson = doc["error"];
   String messageJson = doc["message"];
@@ -193,7 +197,7 @@ void HubController::addAction(JsonArray & actions, String actionId, String actio
 void HubController::generateRegistrationJson(String room, String statusStr) {
 
   registrationJson = "";
-  
+
   StaticJsonDocument<1500> doc;
 
   doc["action"] = "register";
@@ -221,7 +225,7 @@ void HubController::generateRegistrationJson(String room, String statusStr) {
   serializeJson(doc, registrationJson);
 }
 
-void HubController::updateStatus(String room, String statusStr){
+void HubController::updateStatus(String room, String statusStr) {
   generateRegistrationJson(room, statusStr);
   Serial2.println(registrationJson);
 }
@@ -233,6 +237,10 @@ bool HubController::isValidJSON(String jsonString) {
 }
 
 void HubController::checkHub() {
+
+  if (!hubEnabled) {
+    return;
+  }
 
   if (Serial2.available()) {
 
