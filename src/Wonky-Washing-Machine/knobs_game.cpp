@@ -1,5 +1,6 @@
 
 #include "knobs_game.h"
+#include "hub_controller.h"
 
 /**
  * @brief Flag indicating whether the knobs process is complete.
@@ -27,8 +28,9 @@ void setupKnobs(){
  * The delay at the end stops guessing by requiring the knobs to remain in the correct position
  * for a set number of seconds. 
  */
-void runKnobs() {
+void runKnobs(HubController &hubController) {
   while (!knobs_complete) {
+    hubController.checkHub();
     delay(500);
     int pot_value1 = mapPotToNumber(analogRead(POT_PIN_1));
     delay(500);
@@ -39,12 +41,15 @@ void runKnobs() {
     Serial.println("-------------");
     Serial.print("PotValue1: ");
     Serial.println(pot_value1);
+    Serial.println(analogRead(POT_PIN_1));
 
     Serial.print("PotValue2: ");
     Serial.println(pot_value2);
+    Serial.println(analogRead(POT_PIN_2));
 
     Serial.print("PotValue3: ");
     Serial.println(pot_value3);
+    Serial.println(analogRead(POT_PIN_3));
 
     if (pot_value1 == desired_knob1 && pot_value2 == desired_knob2 && pot_value3 == desired_knob3) {
       knobs_complete = true;

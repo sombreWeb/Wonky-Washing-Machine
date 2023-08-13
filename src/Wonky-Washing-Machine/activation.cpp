@@ -1,5 +1,6 @@
 #include "activation.h"
 #include <mfrc522.h>
+#include "hub_controller.h"
 
 /**
    @brief Flag indicating whether the activation process is complete.
@@ -35,7 +36,7 @@ void setupActivation() {
 /**
    @brief Runs the activation process.
 */
-void runActivation() {
+void runActivation(HubController &hubController) {
 
   mfrc522.PCD_Reset();
   mfrc522.PCD_Init();
@@ -44,6 +45,8 @@ void runActivation() {
   setActivationLED("red");
   
   while (!activationComplete) {
+    hubController.checkHub();
+    
     if (checkUIDMatch(desiredUID)) {
       activationComplete = true;
     }

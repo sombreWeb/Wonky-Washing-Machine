@@ -3,6 +3,7 @@
 #include "ArduinoSTL.h"
 #include <SPI.h>
 #include <MD_MAX72xx.h>
+#include "hub_controller.h"
 
 #define HARDWARE_TYPE MD_MAX72XX::FC16_HW
 #define NUM_LED_MATRICES 8
@@ -14,9 +15,9 @@ const int LIGHT_INTENSITY = 1;
 
 MD_MAX72XX mx = MD_MAX72XX(HARDWARE_TYPE, SS_PIN_MATRIX, NUM_LED_MATRICES);
 
-const float searchTolerance = 200.0f;
+const float searchTolerance = 400.0f;
 
-int wiresGameLevel = 3;
+int wiresGameLevel = 1;
 
 bool wiresGameComplete = false;
 
@@ -37,7 +38,7 @@ void setupWireGame()
   showClue("        ");
 }
 
-void runWiresGame()
+void runWiresGame(HubController &hubController)
 {
 
   boolean displayBaseClueFlag = true;
@@ -62,6 +63,9 @@ void runWiresGame()
   showClue(clue);
 
   while (!wiresGameComplete) {
+
+    hubController.checkHub();
+
     currentMillis = millis();
 
     printWireConnections(currentWireConnections);
@@ -107,8 +111,9 @@ void runWiresGame()
         }
       }
     }
-
-    wiresGameComplete = checkIfWiresCorrect();
+    if(!wiresGameComplete){
+      wiresGameComplete = checkIfWiresCorrect();
+    }
   }
 
   if (wiresGameComplete) {

@@ -1,5 +1,6 @@
 #ifndef WIRES_GAME_H
 #define WIRES_GAME_H
+#include "hub_controller.h"
 
 #include "wire_calibration.h"
 #include "ArduinoSTL.h"
@@ -22,6 +23,6 @@ std::vector<wireConnection> getCurrentConnections();
 bool compareByRedPort(const wireConnection& connection1, const wireConnection& connection2);
 void flashColours(std::vector<wireConnection> solutionToFlash);
 void setupWireGame();
-void runWiresGame();
+void runWiresGame(HubController &hubController);
 
 #endif

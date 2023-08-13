@@ -10,7 +10,7 @@ HubController hubController;
 
 void setup() {
 
-  hubController.hubEnabled = false;
+  hubController.hubEnabled = true;
 
   Serial.println("Setting up puzzle...");
 
@@ -20,7 +20,7 @@ void setup() {
   randomSeed(analogRead(A0));
 
   SPI.begin();
-
+  
   hubController.setupHub();
 
   // Set SS pins as OUTPUT and HIGH (off)
@@ -57,6 +57,7 @@ void setup() {
 
 void loop() {
   hubController.checkHub();
+  checkForReset();
   }
 
 void runPuzzle() {
@@ -67,17 +68,17 @@ void runPuzzle() {
   delay(500);
   digitalWrite(SS_PIN_RFID, LOW);
   delay(500);
-  //runActivation();
+  runActivation(hubController);
   digitalWrite(SS_PIN_RFID, HIGH);
   hubController.checkHub();
 
-  //runKnobs();
+  //runKnobs(hubController);
   hubController.checkHub();
 
   //openDoor(topServo);
   hubController.checkHub();
 
-  //runPatternGame();
+  runPatternGame(hubController);
   hubController.checkHub();
 
   //openDoor(sideServo);
@@ -89,11 +90,11 @@ void runPuzzle() {
   delay(500);
   digitalWrite(SS_PIN_MATRIX, LOW);
   delay(500);
-  runWiresGame();
+  runWiresGame(hubController);
   hubController.checkHub();
   digitalWrite(SS_PIN_MATRIX, HIGH);
 
-  openDoor(bottomServo);
+  //openDoor(bottomServo);
   hubController.checkHub();
 
   Serial.print("Puzzle complete!");

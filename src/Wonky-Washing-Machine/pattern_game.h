@@ -2,6 +2,7 @@
 #define PATTERN_GAME_H
 
 #include <FastLED.h> // FastLED library for controlling LEDs
+#include "hub_controller.h"
 
 #define LEDS_DATA_PIN 23      // Data pin for the LED strip
 #define NUM_LEDS 4           // Number of LEDs in the strip
@@ -44,6 +45,6 @@ void updateButtonQueue(int buttonQueue[], int buttonQueueLength);
 int *generateRandomPatternTop(int patternLength);
 void addToButtonSequence(int buttonSequence[], int buttonSequenceLength, int value);
 bool compareArrays(const int *array1, const int *array2, int arrayLength);
-void runPatternGame();
+void runPatternGame(HubController &hubController);
 
 #endif

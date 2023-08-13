@@ -154,6 +154,9 @@ void HubController::processMessage(String jsonString) {
       patternGameComplete = false;
       wiresGameComplete = false;
 
+      fillLights("black");
+      showClue("        ");
+
       closeDoor(topServo);
       closeDoor(sideServo);
       closeDoor(bottomServo);

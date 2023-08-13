@@ -1,10 +1,11 @@
 #include "pattern_game.h"
 #include <FastLED.h> // FastLED library for controlling LEDs
+#include "hub_controller.h"
 
 /**
    Level for the pattern game.
 */
-int patternGameLevel = 3;
+int patternGameLevel = 1;
 
 /**
    Flag to track the completion of the pattern game.
@@ -74,7 +75,7 @@ void setupPatternGame()
 /**
    Function to run the pattern game.
 */
-void runPatternGame()
+void runPatternGame(HubController &hubController)
 {
   fillLights("black");
   
@@ -110,15 +111,25 @@ void runPatternGame()
   // Loop until the game is complete
   while (!patternGameComplete)
   {
+    hubController.checkHub();
+    
     // Loop through the game in increments to give it the progressive completion effect
     for (int patternSegment = 2; patternSegment < (patternLength + patternIncrement); patternSegment += patternIncrement)
     {
+      hubController.checkHub();
+      if (patternGameComplete){
+          break;
+        }
 
-      bool segmentComplete = false; // Flag to check if this segment of the game is complete
+     bool segmentComplete = false; // Flag to check if this segment of the game is complete
 
       // Loop over this segment repeatedly until the player completes the segment
       while (!segmentComplete)
       {
+        hubController.checkHub();
+        if (patternGameComplete){
+          break;
+        }
 
         // Display the colours to the player
         for (int colourIndex = 0; colourIndex < (patternSegment + 1); colourIndex++) // Plus one for the white flash
