@@ -11,8 +11,8 @@ bool knobs_complete = false;
  * @brief The desired values for each knob.
  */
 int desired_knob1 = 1;
-int desired_knob2 = 1;
-int desired_knob3 = 6;
+int desired_knob2 = 3;
+int desired_knob3 = 5;
 
 void setupKnobs(){
     
@@ -76,9 +76,7 @@ int mapPotToNumber(int value) {
     return 3;
   } else if (value >= 615 && value < 820) {
     return 4;
-  } else if (value >= 820 && value < 1023) {
+  } else if (value >= 820 && value < 1025) {
     return 5;
-  } else {
-    return 6;
   }
 }

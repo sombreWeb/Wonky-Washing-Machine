@@ -10,6 +10,8 @@ HubController hubController;
 
 void setup() {
 
+  SPI.begin();
+
   hubController.hubEnabled = true;
 
   Serial.println("Setting up puzzle...");
@@ -19,23 +21,24 @@ void setup() {
 
   randomSeed(analogRead(A0));
 
-  SPI.begin();
-  
   hubController.setupHub();
 
   // Set SS pins as OUTPUT and HIGH (off)
   pinMode(SS_PIN_RFID, OUTPUT);
+  delay(100);
   digitalWrite(SS_PIN_RFID, HIGH);
+  delay(100);
   pinMode(SS_PIN_MATRIX, OUTPUT);
+  delay(100);
   digitalWrite(SS_PIN_MATRIX, HIGH);
 
   setupKnobs();
 
   setupPatternGame();
 
-  delay(500);
+  delay(1000);
   digitalWrite(SS_PIN_MATRIX, LOW);
-  delay(500);
+  delay(1000);
   setupWireGame();
   digitalWrite(SS_PIN_MATRIX, HIGH);
 
@@ -56,9 +59,10 @@ void setup() {
 }
 
 void loop() {
+  delay(500);
   hubController.checkHub();
   checkForReset();
-  }
+}
 
 void runPuzzle() {
 
@@ -72,29 +76,29 @@ void runPuzzle() {
   digitalWrite(SS_PIN_RFID, HIGH);
   hubController.checkHub();
 
-  //runKnobs(hubController);
+  runKnobs(hubController);
   hubController.checkHub();
 
-  //openDoor(topServo);
+  openDoor(topServo);
   hubController.checkHub();
 
   runPatternGame(hubController);
   hubController.checkHub();
 
-  //openDoor(sideServo);
+  openDoor(sideServo);
   hubController.checkHub();
 
   //calibrateRedPorts();
   //calibrateWires();
 
-  delay(500);
+  delay(1000);
   digitalWrite(SS_PIN_MATRIX, LOW);
-  delay(500);
+  delay(1000);
   runWiresGame(hubController);
   hubController.checkHub();
   digitalWrite(SS_PIN_MATRIX, HIGH);
 
-  //openDoor(bottomServo);
+  openDoor(bottomServo);
   hubController.checkHub();
 
   Serial.print("Puzzle complete!");
@@ -103,6 +107,12 @@ void runPuzzle() {
 void checkForReset() {
 
   if (hubController.hubPuzzleResetRequest) {
+    Serial.println("Handling reset request...");
+    activationComplete = false;
+    knobs_complete = false;
+    patternGameComplete = false;
+    wiresGameComplete = false;
+
     hubController.hubPuzzleResetRequest = false;
     runPuzzle();
   }

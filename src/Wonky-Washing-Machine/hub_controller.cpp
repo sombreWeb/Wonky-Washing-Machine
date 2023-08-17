@@ -113,12 +113,14 @@ void HubController::processMessage(String jsonString) {
   if (actionJson == "action") {
 
     if (actionidJson == "openAllDoors") {
+      Serial.println("Doors open command");
       openDoor(topServo);
       openDoor(sideServo);
       openDoor(bottomServo);
     }
 
     if (actionidJson == "closeAllDoors") {
+      Serial.println("Doors close command");
       closeDoor(topServo);
       closeDoor(sideServo);
       closeDoor(bottomServo);
@@ -149,10 +151,10 @@ void HubController::processMessage(String jsonString) {
     }
 
     if (actionidJson == "resetPuzzle") {
-      activationComplete = false;
-      knobs_complete = false;
-      patternGameComplete = false;
-      wiresGameComplete = false;
+      activationComplete = true;
+      knobs_complete = true;
+      patternGameComplete = true;
+      wiresGameComplete = true;
 
       fillLights("black");
       showClue("        ");
@@ -249,8 +251,18 @@ void HubController::checkHub() {
 
     for (int attemptIdx = 0; attemptIdx < invalidBufferRetry; attemptIdx++) {
 
-      String command = Serial2.readStringUntil('\n');
+      Serial.println("Command incomming");
+
+
+      String command = Serial2.readString();
+
+      Serial.println("Command to string error");
+
       command.trim();
+
+      if (command == "") {
+        return;
+      }
 
       Serial.print("Raw command receieved: ");
       Serial.println(command);

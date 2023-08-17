@@ -11,11 +11,11 @@
 //#define CLK_PIN 13
 //#define DATA_PIN 11
 
-const int LIGHT_INTENSITY = 1;
+const int LIGHT_INTENSITY = 2;
 
 MD_MAX72XX mx = MD_MAX72XX(HARDWARE_TYPE, SS_PIN_MATRIX, NUM_LED_MATRICES);
 
-const float searchTolerance = 400.0f;
+const float searchTolerance = 500.0f;
 
 int wiresGameLevel = 1;
 
@@ -29,11 +29,13 @@ std::vector<wireConnection> currentWireConnections;
 void setupWireGame()
 {
   calibrationSetup();
+  delay(500);
   mx.begin();
+  delay(500);
   mx.control(MD_MAX72XX::INTENSITY, LIGHT_INTENSITY);
-  delay(500);
+  delay(2000);
   showClue("RGBYRGBY");
-  delay(500);
+  delay(1000);
   //updateLiveConnectionOffsets();
   showClue("        ");
 }

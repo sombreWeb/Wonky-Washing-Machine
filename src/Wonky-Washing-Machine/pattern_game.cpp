@@ -12,7 +12,7 @@ int patternGameLevel = 1;
 */
 bool patternGameComplete = false;
 
-const int LED_BRIGHTNESS_PATTERN_GAME = 100;
+const int LED_BRIGHTNESS_PATTERN_GAME = 150;
 
 /**
    Length of the patterns per level.
@@ -48,6 +48,8 @@ const unsigned long WHITE_HEX = 0xFFFFFF;
    Time in miliseconds to wait for another button press.
 */
 const int BUTTON_PRESS_WAIT_TIME = 3000;
+
+int lastButtonPressed = -1;
 
 /**
    Array to store the LED colours.
@@ -206,6 +208,7 @@ void runPatternGame(HubController &hubController)
 
                   if (checkButtonPressed() > -1) // If a button is pressed start the timer again and wait for another
                   {
+                    updateButtonQueue(buttonsPressed, patternLength);
                     continue;
                   }
 
@@ -291,18 +294,22 @@ int checkButtonPressed()
 
   if (digitalRead(BUTTON_PIN_RED) == HIGH)
   {
+    Serial.println("Red pressed");
     return 0; // Red button pressed
   }
   else if (digitalRead(BUTTON_PIN_GREEN) == HIGH)
   {
+     Serial.println("Green pressed");
     return 1; // Green button pressed
   }
   else if (digitalRead(BUTTON_PIN_BLUE) == HIGH)
   {
+     Serial.println("Blue pressed");
     return 2; // Blue button pressed
   }
   else if (digitalRead(BUTTON_PIN_YELLOW) == HIGH)
   {
+     Serial.println("Yellow pressed");
     return 3; // Yellow button pressed
   }
   return -1; // No button pressed
@@ -315,6 +322,7 @@ int checkButtonPressed()
 */
 void updateButtonQueue(int buttonQueue[], int buttonQueueLength)
 {
+  Serial.println("Updating buttonQueue");
   int latest = checkButtonPressed();
   if (latest >= 0 && latest != buttonQueue[buttonQueueLength - 1]) // Check if a new button press is detected and it's different from the last button in the queue
   {
@@ -362,6 +370,7 @@ void addToButtonSequence(int buttonSequence[], int buttonSequenceLength, int val
     buttonSequence[i] = buttonSequence[i + 1]; // Shift the elements in the button sequence array to the left
   }
 
+  Serial.println("Added to button queue");
   buttonSequence[buttonSequenceLength - 1] = value; // Add the new value to the end of the button sequence
 }
 

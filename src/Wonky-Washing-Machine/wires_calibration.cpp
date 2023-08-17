@@ -23,33 +23,34 @@ float liveConnectionOffsets[numSensors] = {0.00, 0.0, 0.0, 0.0};
 const int numberOfResistanceTests = 5;
 
 void calibrationSetup() {
-  Wire.begin();
+  //Wire.begin();
   ads.setGain(GAIN_ONE);
   ads.begin();
 }
 
 std::vector<wireConnection> allWireConnections =
 {
-  {3021.61f, 0, 'r', 0},
-  {3500.15f, 0, 'r', 1},
-  {3810.16f, 0, 'r', 2},
-  {4434.78f, 0, 'r', 3},
-  
-  {4795.59f, 1, 'g', 0},
-  {5194.36f, 1, 'g', 1},
-  {5445.34f, 1, 'g', 2},
-  {5965.28f, 1, 'g', 3},
-  
-  {6386.65f, 2, 'b', 0},
-  {6707.42f, 2, 'b', 1},
-  {6906.87f, 2, 'b', 2},
-  {7340.48f, 2, 'b', 3},
-  
-  {8085.09f, 3, 'y', 0},
-  {8339.22f, 3, 'y', 1},
-  {8503.82f, 3, 'y', 2},
-  {8827.29f, 3, 'y', 3},
+    {3019.72f, 0, 'r', 0},
+    {3500.91f, 0, 'r', 1},
+    {3800.54f, 0, 'r', 2},
+    {4444.18f, 0, 'r', 3},
+    
+    {4800.60f, 1, 'g', 0},
+    {5196.37f, 1, 'g', 1},
+    {5430.47f, 1, 'g', 2},
+    {5969.80f, 1, 'g', 3},
+    
+    {6378.69f, 2, 'b', 0},
+    {6707.95f, 2, 'b', 1},
+    {6910.22f, 2, 'b', 2},
+    {7341.59f, 2, 'b', 3},
+    
+    {8100.43f, 3, 'y', 0},
+    {8349.52f, 3, 'y', 1},
+    {8510.75f, 3, 'y', 2},
+    {8844.52f, 3, 'y', 3},
 };
+
 
 void updateLiveConnectionOffsets() {
   std::vector<wireConnection> currentLiveConnections = readCurrentWireSetupCalibration(0, 0);

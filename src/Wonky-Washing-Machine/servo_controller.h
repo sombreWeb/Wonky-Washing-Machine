@@ -10,9 +10,9 @@
 
 struct ServoDetails {
   Servo servo;
-  int pos = 0;
-  int openPos = 180;
-  int closePos = 0;
+  int pos = 100;
+  int openPos = 165;
+  int closePos = 80;
 };
 
 const int SWEEP_SPEED = 15;

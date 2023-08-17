@@ -42,6 +42,7 @@ void runActivation(HubController &hubController) {
   mfrc522.PCD_Init();
   delay(500);
 
+  Serial.println("Changing light to red");
   setActivationLED("red");
   
   while (!activationComplete) {
