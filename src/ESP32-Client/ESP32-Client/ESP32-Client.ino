@@ -6,9 +6,14 @@
 #define RXD2 16
 #define TXD2 17
 
-const char* ssid = "VM9449079"; //Enter SSID
-const char* password = "jbmhcvLtn4wr"; //Enter Password
-const char* websockets_server_host = "192.168.0.22"; //Enter server adress
+const char* ssid = "EscapeRoom"; //Enter SSID
+const char* password = "LetMeOut!"; //Enter Password
+//const char* ssid = "motog"; //Enter SSID
+//const char* password = "aaaabbbb"; //Enter Password
+//const char* ssid = "VM9449079"; //Enter SSID
+//const char* password = "jbmhcvLtn4wr"; //Enter Password
+const char* websockets_server_host = "192.168.0.2"; //QUB
+//const char* websockets_server_host = "192.168.0.22";
 const uint16_t websockets_server_port = 8000; // Enter server port
 
 using namespace websockets;
