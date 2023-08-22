@@ -11,21 +11,55 @@
 //#define CLK_PIN 13
 //#define DATA_PIN 11
 
+/**
+   @brief The light intensity for the LED matrices.
+*/
 const int LIGHT_INTENSITY = 2;
 
+/**
+   @brief Represents the LED matrix object.
+*/
 MD_MAX72XX mx = MD_MAX72XX(HARDWARE_TYPE, SS_PIN_MATRIX, NUM_LED_MATRICES);
 
+/**
+   @brief Tolerance for wire search.
+
+   Will determine how far off a reading can be to the expected wire values to ping a match.
+   A higher tolerance will allow the game deviate in readings in a real world environment at a slight accuracy cost.
+   Tests proved that this is larely acceptable as there are 64 combinations and higher tollerances at most add a few more solutions.
+*/
 const float searchTolerance = 500.0f;
 
+/**
+   @brief The current level of the wires game.
+*/
 int wiresGameLevel = 1;
 
+/**
+   @brief Flag to indicate if the wires game is complete.
+*/
 bool wiresGameComplete = false;
 
+/**
+   @brief Stores the clue for the wires game.
+
+   Eight characters from top to bottom, left to right on the matrices.
+*/
 String clue;
+
+/**
+   @brief Stores the solution for the wires game.
+*/
 std::vector<wireConnection> solution;
+
+/**
+   @brief Stores the current wire connections.
+*/
 std::vector<wireConnection> currentWireConnections;
 
-
+/**
+   @brief Initializes the wires game setup, including calibration and LED matrix.
+*/
 void setupWireGame()
 {
   calibrationSetup();
@@ -40,6 +74,10 @@ void setupWireGame()
   showClue("        ");
 }
 
+/**
+   @brief Runs the wires game loop, managing clues, actions, and game completion.
+   @param hubController The hub controller object.
+*/
 void runWiresGame(HubController &hubController)
 {
 
@@ -113,7 +151,7 @@ void runWiresGame(HubController &hubController)
         }
       }
     }
-    if(!wiresGameComplete){
+    if (!wiresGameComplete) {
       wiresGameComplete = checkIfWiresCorrect();
     }
   }
@@ -124,6 +162,10 @@ void runWiresGame(HubController &hubController)
 
 }
 
+/**
+   @brief Shows a clue on the LED matrix.
+   @param clue The clue to display.
+*/
 void showClue(String clue) {
   String text = clue.substring(4, 8) + clue.substring(0, 4);
   mx.clear();
@@ -134,16 +176,35 @@ void showClue(String clue) {
   }
 }
 
+/**
+   @brief Compares two wireConnection objects by their red port.
+   @param connection1 The first wireConnection object.
+   @param connection2 The second wireConnection object.
+   @return True if the red port of connection1 is less than the red port of connection2; otherwise, false.
+*/
 bool compareByRedPort(const wireConnection& connection1, const wireConnection& connection2) {
   return connection1.redPort < connection2.redPort;
 }
 
+/**
+   @brief Compares two wireConnection objects by their black port.
+   @param connection1 The first wireConnection object.
+   @param connection2 The second wireConnection object.
+   @return True if the black port of connection1 is less than the black port of connection2; otherwise, false.
+*/
 bool compareByBlackPort(const wireConnection& connection1, const wireConnection& connection2) {
   return connection1.blackPort < connection2.blackPort;
 }
 
-/*
-  boolean checkIfWiresCorrect() {
+/**
+   @brief Checks if the current wire connections match the solution.
+
+   This function checks for exclusive matches and will not accept multiple readings for one wire colour.
+   More accurate but less viable in real world environment.
+
+   @return True if the wire connections match the solution; otherwise, false.
+*/
+boolean checkIfWiresCorrectExclusiveColours() {
   currentWireConnections = getCurrentConnections();
 
   std::sort(currentWireConnections.begin(), currentWireConnections.end(), compareByRedPort);
@@ -167,9 +228,17 @@ bool compareByBlackPort(const wireConnection& connection1, const wireConnection&
   showClue("********");
 
   return true;
-  }
-*/
+}
 
+/**
+   @brief Checks if the current wire connections match the solution.
+
+   Will read the wires and be satisfied at any match for each of the colours.
+   Ignores double reads on the same colour.
+   Proven better in testing for real world hardware variance.
+
+   @return True if the wire connections match the solution; otherwise, false.
+*/
 bool checkIfWiresCorrect() {
 
   currentWireConnections = getCurrentConnections();
@@ -198,7 +267,11 @@ bool checkIfWiresCorrect() {
   return true;
 }
 
-
+/**
+   @brief Retrieves level-specific data for the wires game.
+   @param level The level for which to get data.
+   @return The LevelData structure containing level-specific data.
+*/
 LevelData getLevelData(int level) {
   LevelData levelData;
   switch (level) {
@@ -250,6 +323,16 @@ LevelData getLevelData(int level) {
   return levelData;
 }
 
+/**
+   @brief Filters the closest color values from a list of connections.
+
+   Can be used if a single colour only is desired from readings.
+   The colour connection will be the one which is closest to a matching external resistance value.
+
+   @param connections The list of wire connections.
+   @param externalAverageResistance The external average resistance value for filtering.
+   @return A vector containing the filtered wire connections.
+*/
 std::vector<wireConnection> filterClosestColourValues(std::vector<wireConnection> &connections, float externalAverageResistance) {
 
   struct uniqueColourMatches {
@@ -276,6 +359,10 @@ std::vector<wireConnection> filterClosestColourValues(std::vector<wireConnection
   return filteredConnections;
 }
 
+/**
+   @brief Retrieves the current wire connections based on sensor readings.
+   @return A vector containing the current wire connections.
+*/
 std::vector<wireConnection> getCurrentConnections() {
   std::vector<wireConnection> currentConnections;
   for (int sensorNum = 0; sensorNum < numSensors; sensorNum++) {
@@ -301,6 +388,13 @@ std::vector<wireConnection> getCurrentConnections() {
   return currentConnectionsFiltered;
 }
 
+/**
+   @brief Flashes the colors of the solution on the LED matrix.
+
+   This gives the players an indication as to the order of the colours - but not the actual connection solution.
+
+   @param solutionToFlash The solution wire connections to flash.
+*/
 void flashColours(std::vector<wireConnection> solutionToFlash) {
 
   std::sort(solutionToFlash.begin(), solutionToFlash.end(), compareByBlackPort);

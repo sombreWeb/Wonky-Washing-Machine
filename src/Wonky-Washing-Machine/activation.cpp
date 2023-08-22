@@ -22,7 +22,7 @@ MFRC522 mfrc522(SS_PIN_RFID, RST_PIN_RFID);
    @brief Initializes the activation setup.
 */
 void setupActivation() {
-  
+
   pinMode(RED_PIN, OUTPUT);
   pinMode(GREEN_PIN, OUTPUT);
   pinMode(BLUE_PIN, OUTPUT);
@@ -44,15 +44,15 @@ void runActivation(HubController &hubController) {
 
   Serial.println("Changing light to red");
   setActivationLED("red");
-  
+
   while (!activationComplete) {
     hubController.checkHub();
-    
+
     if (checkUIDMatch(desiredUID)) {
       activationComplete = true;
     }
   }
-  
+
   if (activationComplete) {
     setActivationLED("green");
   }
@@ -102,7 +102,12 @@ void setActivationLED(String colour) {
 }
 
 
-// Function to print the UID
+/**
+   @brief Prints the Unique Identifier (UID) stored in an array of bytes.
+
+   @param uid An array of bytes containing the UID to be printed.
+   @param uidSize The size (number of bytes) of the UID array.
+*/
 void printUID(byte* uid, byte uidSize) {
   for (byte i = 0; i < uidSize; i++) {
     if (uid[i] < 0x10) {

@@ -15,7 +15,6 @@ int desired_knob2 = 3;
 int desired_knob3 = 5;
 
 void setupKnobs(){
-    
   }
 
 /**

@@ -3,55 +3,100 @@
 #include <Wire.h>
 #include <Adafruit_ADS1X15.h>
 
-
+/**
+   @brief Number of sensors and their respective pins.
+*/
 const int numSensors = 4;
 const int sensorPins[] = { PORT_PIN_0, PORT_PIN_1, PORT_PIN_2, PORT_PIN_3 };
+
+/**
+   @brief Arrays for storing sensor values and Vouts.
+*/
 int sensorValues[numSensors] = { 0 };
 double Vouts[numSensors] = { 0 };
+
+/**
+   @brief Constants for voltage and reference resistance.
+*/
 float Vin = 5;
 float Rref = 15000;
 
+/**
+   @brief ADS1115 ADC object for anlog readings.
+*/
 Adafruit_ADS1115 ads;
 
+/**
+   @brief Maximum allowed resistance value.
+*/
 const float MAX_ALLOWED_RESISTANCE_VALUE = 100000;
 
+/**
+   @brief Home port for reference when calibrating other ports to match.
+*/
 int homePort = 0;
+
+/**
+   @brief Red port offsets to make all meaure equally.
+*/
 const float redPortOffsets[numSensors] = {0.00, 0.0052, 0.0003, -0.0031};
 
+/**
+   @brief Live connection offsets to store temporary calibration values if enabled.
+*/
 float liveConnectionOffsets[numSensors] = {0.00, 0.0, 0.0, 0.0};
 
+/**
+   @brief Number of tests to average to get a resistance value.
+*/
 const int numberOfResistanceTests = 5;
 
+/**
+   @brief Initializes the calibration setup.
+
+   Initializes the ADS1115 ADC and sets its gain.
+*/
 void calibrationSetup() {
-  //Wire.begin();
   ads.setGain(GAIN_ONE);
   ads.begin();
 }
 
+/**
+   @brief A lookup vector to match read values to expected connection values.
+
+   This assumes all red port measure the same through calibration allowing all 64 combinations to be determined.
+*/
 std::vector<wireConnection> allWireConnections =
 {
-    {3019.72f, 0, 'r', 0},
-    {3500.91f, 0, 'r', 1},
-    {3800.54f, 0, 'r', 2},
-    {4444.18f, 0, 'r', 3},
-    
-    {4800.60f, 1, 'g', 0},
-    {5196.37f, 1, 'g', 1},
-    {5430.47f, 1, 'g', 2},
-    {5969.80f, 1, 'g', 3},
-    
-    {6378.69f, 2, 'b', 0},
-    {6707.95f, 2, 'b', 1},
-    {6910.22f, 2, 'b', 2},
-    {7341.59f, 2, 'b', 3},
-    
-    {8100.43f, 3, 'y', 0},
-    {8349.52f, 3, 'y', 1},
-    {8510.75f, 3, 'y', 2},
-    {8844.52f, 3, 'y', 3},
+  {3019.72f, 0, 'r', 0},
+  {3500.91f, 0, 'r', 1},
+  {3800.54f, 0, 'r', 2},
+  {4444.18f, 0, 'r', 3},
+
+  {4800.60f, 1, 'g', 0},
+  {5196.37f, 1, 'g', 1},
+  {5430.47f, 1, 'g', 2},
+  {5969.80f, 1, 'g', 3},
+
+  {6378.69f, 2, 'b', 0},
+  {6707.95f, 2, 'b', 1},
+  {6910.22f, 2, 'b', 2},
+  {7341.59f, 2, 'b', 3},
+
+  {8100.43f, 3, 'y', 0},
+  {8349.52f, 3, 'y', 1},
+  {8510.75f, 3, 'y', 2},
+  {8844.52f, 3, 'y', 3},
 };
 
+/**
+   @brief Optional funtion to quickly read the sensors of a single wire reading.
 
+   Used for quick calibration before runs.
+
+   @note This feature is not generally necessary as the live system tested stable without it.
+   @note Feature not used in live system.
+*/
 void updateLiveConnectionOffsets() {
   std::vector<wireConnection> currentLiveConnections = readCurrentWireSetupCalibration(0, 0);
 
@@ -87,7 +132,14 @@ void updateLiveConnectionOffsets() {
   }
 }
 
+/**
+   @brief Optional funtion to apply live connection offset readings.
 
+   Used for quick calibration before runs.
+
+   @note This feature is not generally necessary as the live system tested stable without it.
+   @note Feature not used in live system.
+*/
 void applyLiveConnectionOffsets() {
   for (auto& connection : allWireConnections) {
     if (connection.colour == 'r') {
@@ -102,6 +154,17 @@ void applyLiveConnectionOffsets() {
   }
 }
 
+/**
+   @brief Compares two wireConnection objects by color and black port.
+
+   This comparator function is used to sort wireConnection objects primarily by color
+   and secondarily by black port.
+
+   @param wire1 The first wireConnection object to compare.
+   @param wire2 The second wireConnection object to compare.
+
+   @return True if wire1 should come before wire2 in the sorted order; otherwise, false.
+*/
 bool compareByColourAndBlackPort(const wireConnection &wire1, const wireConnection &wire2) {
   if (wire1.colour != wire2.colour) {
     return wire1.colour < wire2.colour;
@@ -110,6 +173,17 @@ bool compareByColourAndBlackPort(const wireConnection &wire1, const wireConnecti
   }
 }
 
+/**
+   @brief Compares two wireConnection objects by color and red port.
+
+   This comparator function is used to sort wireConnection objects primarily by color
+   and secondarily by red port.
+
+   @param wire1 The first wireConnection object to compare.
+   @param wire2 The second wireConnection object to compare.
+
+   @return True if wire1 should come before wire2 in the sorted order; otherwise, false.
+*/
 bool compareByColourAndRedPort(const wireConnection &wire1, const wireConnection &wire2) {
   if (wire1.colour != wire2.colour) {
     return wire1.colour < wire2.colour;
@@ -118,10 +192,29 @@ bool compareByColourAndRedPort(const wireConnection &wire1, const wireConnection
   }
 }
 
+/**
+   @brief Compares two wireConnection objects by their resistance values.
+
+   This comparator function is used to sort wireConnection objects based on their
+   resistance values.
+
+   @param wire1 The first wireConnection object to compare.
+   @param wire2 The second wireConnection object to compare.
+
+   @return True if wire1's resistance value is less than wire2's; otherwise, false.
+*/
 bool compareByResistance(const wireConnection &wire1, const wireConnection &wire2) {
   return wire1.resistanceValue < wire2.resistanceValue;
 }
 
+/**
+   @brief Calculates the percentage difference between two values.
+
+   @param value1 The first value.
+   @param value2 The second value.
+
+   @return The percentage difference between value1 and value2.
+*/
 double calculatePercentageDifference(double value1, double value2) {
   double percentageDiff = ((value1 - value2) / ((value1 + value2) / 2.0)) * 100.0;
   if (isnan(percentageDiff)) {
@@ -130,6 +223,18 @@ double calculatePercentageDifference(double value1, double value2) {
   return percentageDiff;
 }
 
+
+/**
+   @brief Finds the average resistance value for a sensor.
+
+   The red port offset can be disabled to allow red port calibration.
+
+   @param sensorNumber The sensor number.
+   @param numberOfTests The number of resistance tests to perform.
+   @param redOffsetOn Whether to apply red port offset.
+
+   @return The average resistance value for the sensor.
+*/
 float findAverageResistance(int sensorNumber, int numberOfTests, boolean redOffsetOn = true) {
   float redOffset = Rref * (1 + redPortOffsets[sensorNumber]);
 
@@ -151,6 +256,18 @@ float findAverageResistance(int sensorNumber, int numberOfTests, boolean redOffs
   return averageResistance;
 }
 
+/**
+   @brief Reads the current wire setup for calibration.
+
+   Differs from readCurrentWireSetup in main as this function expects the wires to be in a paticular
+   order: R G B Y - with optional offsets to manipulate their expected positions from that order.
+
+   @param redOffset The red port offset.
+   @param blackOffset The black port offset.
+   @param redOffsetOn Whether to apply red port offset.
+
+   @return A vector of wireConnection objects representing the current wire setup calibration.
+*/
 std::vector<wireConnection> readCurrentWireSetupCalibration(int redOffset, int blackOffset, boolean redOffsetOn = true) {
   char colours[] = { 'r', 'g', 'b', 'y' };
   std::vector<wireConnection> currentWireSetup;
@@ -162,6 +279,11 @@ std::vector<wireConnection> readCurrentWireSetupCalibration(int redOffset, int b
   return currentWireSetup;
 }
 
+/**
+   @brief Prints the wire connections to the serial monitor.
+
+   @param values A vector of wireConnection objects to print.
+*/
 void printWireConnections(std::vector<wireConnection> &values) {
 
   for (const auto &connection : values) {
@@ -177,6 +299,13 @@ void printWireConnections(std::vector<wireConnection> &values) {
   Serial.println("---------------");
 }
 
+/**
+   @brief Prints the wire connections to the serial monitor in raw format.
+
+   This output can then be used to replace the current allWireConnections vectors if desired.
+
+   @param values A vector of wireConnection objects to print.
+*/
 void printWireConnectionsRaw(std::vector<wireConnection> &values) {
 
   Serial.println("{");
@@ -194,12 +323,19 @@ void printWireConnectionsRaw(std::vector<wireConnection> &values) {
   Serial.println("};");
 }
 
+
+/**
+   @brief Prints the current wire connections to the serial monitor.
+*/
 void printCurrentWireConnections() {
   std::vector<wireConnection> currentValues = readCurrentWireSetupCalibration(0, 0);
   std::sort(currentValues.begin(), currentValues.end(), compareByColourAndBlackPort);
   printWireConnections(currentValues);
 }
 
+/**
+   @brief Performs the red ports calibration.
+*/
 void calibrateRedPorts() {
   std::vector<wireConnection> calibrationValues;
 
@@ -265,6 +401,10 @@ void calibrateRedPorts() {
   Serial.println("};");
 }
 
+
+/**
+   @brief Performs the wire calibration.
+*/
 void calibrateWires() {
   std::vector<wireConnection> calibrationValues;
 

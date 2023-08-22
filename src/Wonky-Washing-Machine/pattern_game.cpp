@@ -12,6 +12,9 @@ int patternGameLevel = 1;
 */
 bool patternGameComplete = false;
 
+/**
+  Value to set brightness of LEDs (0-255).
+*/
 const int LED_BRIGHTNESS_PATTERN_GAME = 150;
 
 /**

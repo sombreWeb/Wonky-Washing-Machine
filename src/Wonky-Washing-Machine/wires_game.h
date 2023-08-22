@@ -16,6 +16,7 @@ extern boolean wiresGameComplete;
 extern int wiresGameLevel;
 
 void showClue(String clue);
+boolean checkIfWiresCorrectExclusiveColours();
 bool checkIfWiresCorrect();
 LevelData getLevelData(int level);
 std::vector<wireConnection> filterClosestColourValues(std::vector<wireConnection>& connections, float externalAverageResistance);

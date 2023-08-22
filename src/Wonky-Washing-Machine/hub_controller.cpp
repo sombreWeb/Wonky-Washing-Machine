@@ -7,25 +7,40 @@
 #include "wires_game.h"
 #include "hub_controller.h"
 
+// NOTE: On the Arduino Mega, you may need to manually change the internal RX and TX buffer sizes (128).
 
-/*
-   NOTE" On the Arduino mega you need to manually change the internal RX and TX buffer sizes.
+/**
+   @brief Room ID for registration
 */
-
 String registerRoomId = "1";
 
+/**
+   @brief Flags for tracking connections and registration status
+*/
 boolean wifiConnected = false;
 boolean serverHubConnected = false;
 boolean serverHubRegistered = false;
 
+/**
+   @brief Time intervals for checking connection and registration status
+*/
 int timeBetweenWifiConnectionCheck = 2000;
 int timeBetweenServerHubConnectionCheck = 2000;
 int timeBetweenRegisterCheck = 10000;
 
+/**
+   @brief Retry count for handling invalid buffers
+*/
 int invalidBufferRetry = 50;
 
+/**
+   @brief JSON string for registration data
+*/
 String registrationJson;
 
+/**
+   @brief Sets up the hub controller, including Wi-Fi, server hub, and registration.
+*/
 void HubController::setupHub() {
 
   if (!hubEnabled) {
@@ -71,6 +86,11 @@ void HubController::setupHub() {
   serializeJson(doc, registrationJson);
 }
 
+/**
+   @brief Processes an incoming JSON message from the server.
+
+   @param jsonString The JSON message to process.
+*/
 void HubController::processMessage(String jsonString) {
 
   StaticJsonDocument<500> doc;
@@ -192,6 +212,14 @@ void HubController::processMessage(String jsonString) {
   }
 }
 
+/**
+   @brief Adds an action to the JSON registration data.
+
+   @param actions The JSON array where the action should be added.
+   @param actionId The ID of the action.
+   @param actionName The name of the action.
+   @param enabled Whether the action is enabled.
+*/
 void HubController::addAction(JsonArray & actions, String actionId, String actionName, boolean enabled) {
   JsonObject actionObj = actions.createNestedObject();
   actionObj["actionid"] = actionId;
@@ -199,6 +227,12 @@ void HubController::addAction(JsonArray & actions, String actionId, String actio
   actionObj["enabled"] = enabled;
 }
 
+/**
+   @brief Generates JSON registration data based on room number and a start status.
+
+   @param room The room ID for registration.
+   @param statusStr The status string to include in the registration data.
+*/
 void HubController::generateRegistrationJson(String room, String statusStr) {
 
   registrationJson = "";
@@ -230,17 +264,33 @@ void HubController::generateRegistrationJson(String room, String statusStr) {
   serializeJson(doc, registrationJson);
 }
 
+/**
+   @brief Updates the hub's status with new registration data.
+
+   @param room The room ID for registration.
+   @param statusStr The status string to include in the registration data.
+*/
 void HubController::updateStatus(String room, String statusStr) {
   generateRegistrationJson(room, statusStr);
   Serial2.println(registrationJson);
 }
 
+/**
+   @brief Checks if a given JSON string is valid.
+
+   @param jsonString The JSON string to validate.
+
+   @return true if the JSON string is valid, false otherwise.
+*/
 bool HubController::isValidJSON(String jsonString) {
   StaticJsonDocument<500> doc;
   DeserializationError error = deserializeJson(doc, jsonString);
   return error == DeserializationError::Ok;
 }
 
+/**
+   @brief Checks the hub for incoming commands and processes them.
+*/
 void HubController::checkHub() {
 
   if (!hubEnabled) {
