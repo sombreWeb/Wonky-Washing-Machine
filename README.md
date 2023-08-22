@@ -1,6 +1,6 @@
 # Wonky-Washing-Machine!
 
-The Wonky Washing Machine is an interactive educational escape room puzzle designed to engage participants in a collaborative repair mission. The project consists of three stages: setting counting knobs, fixing a control panel, and mending the wires. It is being developed using an Arduino Mega 2560 as a core component, adding an exciting tech element to the experience.
+The Wonky Washing Machine is an interactive educational escape room puzzle designed to engage participants in a collaborative repair mission. The project consists of three stages: setting counting knobs, fixing a control panel, and mending the wires. It is being developed using an Arduino Mega 2560 as a core component, adding an exciting tech element to the experience. It includes optional network capabilities through as ESP32 with WebSocket connections. 
 
 
 ## Pins
