@@ -7,52 +7,51 @@ The Wonky Washing Machine is an interactive educational escape room puzzle desig
 
 The following tables show the pin connections for various elements used in the Wonky Washing Machine project. 
 
-### Random Seed
+## Arduino Mega
 
-|||
-|--|--|
-|RANDOM_SEED|Pin A7|
-|||
+| Component             | Pin Name     | Pin Number |
+|-----------------------|--------------|------------|
+| RFID Reset Pin        | RST_PIN_RFID | 49         |
+| RFID Slave Select Pin | SS_PIN_RFID  | 53         |
+| Red LED Pin           | RED_PIN      | 48         |
+| Green LED Pin         | GREEN_PIN    | 46         |
+| Blue LED Pin          | BLUE_PIN     | 47         |
+| Potentiometer 1       | POT_PIN_1    | A3         |
+| Potentiometer 2       | POT_PIN_2    | A2         |
+| Potentiometer 3       | POT_PIN_3    | A1         |
+| LED Data Pin          | LEDS_DATA_PIN| 23         |
+| Number of LEDs        | NUM_LEDS     | 4          |
+| Red Button Pin        | BUTTON_PIN_RED    | 31   |
+| Green Button Pin      | BUTTON_PIN_GREEN  | 29   |
+| Blue Button Pin       | BUTTON_PIN_BLUE   | 27   |
+| Yellow Button Pin     | BUTTON_PIN_YELLOW | 25   |
+| Relay Pin             | RELAY_PIN   | 2          |
+| Top Servo Pin         | TOP_SERVO   | 3          |
+| Side Servo Pin        | SIDE_SERVO  | 4          |
+| Bottom Servo Pin      | BOTTOM_SERVO| 5          |
+| Port Pin 0            | PORT_PIN_0  | 0          |
+| Port Pin 1            | PORT_PIN_1  | 1          |
+| Port Pin 2            | PORT_PIN_2  | 2          |
+| Port Pin 3            | PORT_PIN_3  | 3          |
+| Matrix Slave Select Pin| SS_PIN_MATRIX| 19        |
+| Serial RX (UART2 RXD2) | RXD2     | 16         |
+| Serial TX (UART2 TXD2) | TXD2     | 17         |
+| SDA (I2C)     | SDA      | 20         |
+| SCL (I2C)     | SCL      | 21         |
+| MISO (SPI)    | MISO     | 50         |
+| MOSI (SPI)    | MOSI     | 51         |
+| SCK (SPI)     | SCK      | 52         |
 
-### RFID-RC522 
+NOTE: The SPI connections are bussed. 
 
-|||
-|--|--|
-|SS|Pin 53|
-|RST|Pin 49|
-|||
+## ESP-32
 
-### Activation RGB LED
+| Component              | Pin Name | Pin Number |
+|------------------------|----------|------------|
+| Serial RX (UART2 RXD2) | RXD2     | 16         |
+| Serial TX (UART2 TXD2) | TXD2     | 17         |
 
-|||
-|--|--|
-|RED|Pin 26|
-|GREEN|Pin 24|
-|BLUE|Pin 22|
-|||
 
-### Potentiometers
 
-|||
-|--|--|
-|POT_1|Pin A0|
-|POT_2|Pin A1|
-|POT_2|Pin A2|
-|||
 
-### LED Strip - Pattern Game
 
-|||
-|--|--|
-|DATA_PIN|Pin 6|
-|||
-
-### Buttons - Pattern Game
-
-|||
-|--|--|
-|RED|Pin 30|
-|GREEN|Pin 32|
-|BLUE|Pin 34|
-|YELLOW|Pin 36|
-|||
