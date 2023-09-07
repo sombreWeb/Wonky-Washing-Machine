@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>SimonSays_UI</title>
+    <style>
+        .level-name {
+            width: 200px;
+            height: 30px;
+            border: 1px solid #000;
+            text-align: left;
+            position: absolute;
+            font-size: 18px;
+        }
+
+        .colour-square {
+            width: 50px;
+            height: 50px;
+            position: absolute;
+            background-color: red;
+            cursor: pointer;
+        }
+
+        .level-square {
+            width: 100px;
+            height: 100px;
+            position: absolute;
+            background-color: red;
+            cursor: pointer;
+        }
+
+        .text {
+            width: 150px;
+            height: 100px;
+            position: absolute;
+
+        }
+
+        .button {
+            background-color: #4CAF50;
+            border: none;
+            color: white;
+            padding: 15px 32px;
+            text-align: center;
+            text-decoration: none;
+            font-size: 16px;
+            cursor: pointer;
+            position: absolute;
+            width: 220px;
+            height: 45px;
+        }
+
+        .quantity {
+            width: 50px;
+            height: 30px;
+            position: absolute;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="text" id="lengthText" style="top: 20px; left: 15px;">Length:</div>
+    <div class="text" id="incrementText" style="top: 60px; left: 15px;">Increment:</div>
+    <div class="text" id="speedText" style="top: 100px; left: 15px;">Speed:</div>
+
+    <input class="quantity" id="lengthQuantity" min="2" value="2" type="number" style="top: 10px; left: 100px">
+    <input class="quantity" id="incrementQuantity" min="1" max="3" value="1" type="number"
+        style="top: 50px; left: 100px">
+    <input class="quantity" id="speedQuantity" min="100" value="1000" type="number" style="top: 90px; left: 100px">
+
+    <input type="text" class="level-name" id="levelName" placeholder="Level Name" style="top: 10px; left: 165px">
+    <button class="button" id="updateButton" onclick="updateLevels()" style="top: 50px; left: 165px">Update</button>
+    <button class="button" id="showSpeedButton" onclick="showSpeed()" style="top: 100px; left: 165px">Show
+        Speed</button>
+    <button class="button" id="doneButton" onclick="getPuzzleData()" style="top: 150px; left: 165px">Input Puzzle
+        Solution</button>
+
+    <div class="colour-square" id="red" style="top: 10px; left: 400px; background-color: red"></div>
+    <div class="colour-square" id="blue" style="top: 10px; left: 450px; background-color: blue"></div>
+    <div class="colour-square" id="green" style="top: 60px; left: 400px; background-color: green"></div>
+    <div class="colour-square" id="yellow" style="top: 60px; left: 450px; background-color: yellow"></div>
+    <div class="text" id="selectedColoutText" style="top: 135px; left: 460px;">Selected colour</div>
+    <div class="colour-square" id="selected-colour" style="top: 120px; left: 400px;  background-color: red"></div>
+
+    <div class="text" id="level1" style="top: 200px; left: 15px;">Level 1</div>
+    <div class="level-square" id="startSquare1" style="top: 230px; left: 15px;"></div>
+    <div class="level-square" id="startSquare2" style="top: 230px; left: 130px;"></div>
+
+    <body onload="randomStart()">
+
+        <script>
+            const colourSquares = document.querySelectorAll('.colour-square');
+            const selectedColourSquare = document.getElementById('selected-colour');
+            var levelSquares = document.querySelectorAll('.level-square');
+            var colours = ["red", "blue", "green", "yellow"];
+            var finalColours = [];
+            var levelCount = 1;
+            var levelIncrement = 1;
+            var isSpeedRunning = false;
+
+            //Add click events for colour select and level squares
+            colourSquares.forEach(square => {
+                square.addEventListener('click', changeSelectedColour);
+            });
+
+            levelSquares.forEach(square => {
+                square.addEventListener('click', changeLevelColour);
+            });
+
+            //Change selected colour when user clicks on a colour select square
+            function changeSelectedColour(square) {
+                const selectedColour = square.target.style.backgroundColor;
+                selectedColourSquare.style.backgroundColor = selectedColour;
+            }
+
+            //On page load randomise the colour of the first 2 squares (level 1)
+            //Update index, levelNo of squares and finalColours array
+            function randomStart() {
+                let startSquares = document.querySelectorAll('.level-square');
+
+                startSquares.forEach(randomColour);
+                startSquares.forEach(function (square, i) {
+                    finalColours.push(square.style.backgroundColor);
+                    square["index"] = i;
+                    square["levelNo"] = 1;
+                });
+            }
+
+            //Randomise the colour of a level-square
+            function randomColour(square) {
+                square.style.backgroundColor = colours[Math.floor(Math.random() * colours.length)];
+            }
+
+            //When user clicks a level square, change color of selected square
+            //Loop through all squares and change colour of squares with the same index as clicked
+            //Ensures the order of buttons pressed remains the same on each level
+            function changeLevelColour(square) {
+                const selectedColour = selectedColourSquare.style.backgroundColor;
+                let indexToChange = square.srcElement.index;
+                let existingLevelSquares = document.getElementsByClassName('level-square');
+
+                for (let i = 0; i < existingLevelSquares.length; i++) {
+                    if (existingLevelSquares[i].index == indexToChange)
+                        existingLevelSquares[i].style.backgroundColor = selectedColour;
+                }
+                finalColours[indexToChange] = selectedColour;
+            }
+
+            //Return an array of objects in the form {{"levelNo":n, "squaresCount":x}}
+            //Keep adding increment in while loop until number of level-squares = length entered by user (i.e. final level)
+            function getLevels(levelLength, increment) {
+                var lastLevelLength = 2;
+                var levels = [{ "levelNo": 1, "squaresCount": 2 }];
+                var levelNo = 1;
+
+                while (lastLevelLength != levelLength) {
+                    levelNo++;
+                    var squareCount = levels.slice(-1)[0].squaresCount + increment;
+
+                    if (squareCount > levelLength)
+                        squareCount = levelLength;
+
+                    levels.push({ "levelNo": levelNo, "squaresCount": squareCount });
+                    lastLevelLength = squareCount;
+                }
+                return levels;
+            }
+
+            //When user clicks update button, remove all 'Level N' text and level-squares
+            //**Except for Level 1 (minimum level required)
+            //Use id to determine if element should be removed -- starting elements all have IDs, added do not
+            function resetLevels() {
+                let existingLevelSquares = document.getElementsByClassName('level-square');
+                let existingLevelText = document.getElementsByClassName('text');
+
+                for (let i = existingLevelSquares.length - 1; i > 0; i--) {
+                    if (existingLevelSquares[i].id == "")
+                        existingLevelSquares[i].remove();
+                }
+                for (let i = existingLevelText.length - 1; i > 0; i--) {
+                    if (existingLevelText[i].id == "")
+                        existingLevelText[i].remove();
+                }
+            }
+
+            //When user clicks update button, reset all levels and re-draw using input values
+            //If the user hasn't updated inputs, do nothing
+            //Update global var of length and increment -- when user clicks input, we want to use the current level setup, not values in textboxes
+            function updateLevels() {
+                let levelLength = parseInt(document.getElementById('lengthQuantity').value);
+                let increment = parseInt(document.getElementById('incrementQuantity').value);
+                let existingLevelSquares = document.getElementsByClassName('level-square');
+
+                if (existingLevelSquares.length == levelLength) {
+                    return;
+                }
+
+                resetLevels();
+
+                let levels = getLevels(levelLength, increment);
+                levels.forEach(drawLevel);
+
+                levelIncrement = increment;
+                levelCount = levelLength;
+            }
+
+            //Add 'Level N' text and level-squares when user clicks update
+            //level arg here is generated from getLevels func -- i.e. in the form {{"levelNo":n, "squaresCount":x}}
+            //Ignore Level 1 since this is is drawn on page load
+            //If adding a new level-square, randomise the colour -- otherwise get colour from global finalColours array
+            function drawLevel(level) {
+                if (level.levelNo == 1)
+                    return;
+
+                let newLevelText = document.createElement('div');
+                newLevelText.classList.add('text');
+                document.body.appendChild(newLevelText);
+
+                newLevelText.style.top = (50 + 150 * level.levelNo) + 'px';
+                newLevelText.style.left = '15px';
+                newLevelText.innerHTML = 'Level ' + level.levelNo;
+
+                for (let i = 0; i < level.squaresCount; i++) {
+                    let newLevelSquare = document.createElement('div');
+                    newLevelSquare.classList.add('level-square');
+                    document.body.appendChild(newLevelSquare);
+
+                    newLevelSquare.style.top = (80 + 150 * level.levelNo) + 'px';
+                    newLevelSquare.style.left = (15 + i * 115) + 'px';
+                    newLevelSquare.addEventListener('click', changeLevelColour);
+                    newLevelSquare["index"] = i;
+                    newLevelSquare["levelNo"] = level.levelNo;
+
+                    if (i >= finalColours.length) {
+                        randomColour(newLevelSquare);
+                        finalColours.push(newLevelSquare.style.backgroundColor);
+                    } else {
+                        newLevelSquare.style.backgroundColor = finalColours[i];
+                    }
+
+                }
+
+            }
+
+            //Sleep function required for showing user the speed of the levels
+            function sleep(ms) {
+                return new Promise(resolve => setTimeout(resolve, ms));
+            }
+
+            //When user clicks the show speed button, add a border to level-squares, incrementing over each index to show how fast each level will display
+            //Use global isSpeedRunning boolean to make sure this function can't run multiple times at once (give it is asynchronous)
+            //Loop over all level-squares, adding border to those that have index = i and sleep for as long as the user has entered in each loop
+            async function showSpeed() {
+                if (isSpeedRunning)
+                    return;
+
+                isSpeedRunning = true;
+                let existingLevelSquares = document.getElementsByClassName('level-square');
+                let speed = parseInt(document.getElementById('speedQuantity').value);
+
+                for (let i = 0; i <= finalColours.length; i++) {
+                    for (let j = 0; j < existingLevelSquares.length; j++) {
+                        if (existingLevelSquares[j].index == i) {
+                            existingLevelSquares[j].style.border = '5px solid purple';
+                        } else {
+                            existingLevelSquares[j].style.border = 'none';
+                        }
+                    }
+                    await sleep(speed);
+                }
+                isSpeedRunning = false;
+            }
+
+            //Parse level data into correct format for later use
+            //If the user has not entered a level name, add a red border to highlight that this is required
+            function getPuzzleData() {
+                let levelName = document.getElementById('levelName');
+                let speed = document.getElementById('speedQuantity');
+
+                if (levelName.value == "") {
+                    levelName.style.border = "2px solid red";
+                    return;
+                } else {
+                    levelName.style.border = "thin solid black";
+                    let levels = getLevels(levelCount, levelIncrement);
+                    let levelColours = [];
+
+                    levels.forEach(level => {
+                        levelColours.push(finalColours.slice(0, level.squaresCount));
+                    });
+
+                    levelData = '{' + levelName.value + ':{"length":' + levelCount + ', increment:' + levelIncrement + ', speed:' + speed.value + '}}';
+
+                    console.log(levelData);
+                }
+            }
+
+        </script>
+    </body>
+
+</html>

@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Wire_UI</title>
+    <style>
+        .rectangle {
+            width: 370px;
+            height: 60px;
+            background-color: #878686;
+            position: absolute;
+        }
+
+        .circle {
+            width: 50px;
+            height: 50px;
+            background-color: #444;
+            border-radius: 50%;
+            position: absolute;
+            cursor: pointer;
+        }
+
+        .wire {
+            position: absolute;
+            border: 10px solid red;
+        }
+
+        .clue {
+            width: 50px;
+            height: 50px;
+            border: 1px solid #000;
+            text-align: center;
+            position: absolute;
+            font-size: 24px;
+        }
+
+        .level-name {
+            width: 200px;
+            height: 30px;
+            border: 1px solid #000;
+            text-align: left;
+            position: absolute;
+            font-size: 18px;
+        }
+
+        .colour-square {
+            width: 50px;
+            height: 50px;
+            position: absolute;
+            background-color: red;
+            cursor: pointer;
+        }
+
+        .text {
+            width: 150px;
+            height: 100px;
+            position: absolute;
+
+        }
+
+        .button {
+            background-color: #4CAF50;
+            border: none;
+            color: white;
+            padding: 15px 32px;
+            text-align: center;
+            text-decoration: none;
+            font-size: 16px;
+            cursor: pointer;
+            position: absolute;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="rectangle" style="top: 80px; left: 50px;"></div>
+    <div class="circle" id="top1" style="top: 85px; left: 60px;"></div>
+    <div class="circle" id="top2" style="top: 85px; left: 160px;"></div>
+    <div class="circle" id="top3" style="top: 85px; left: 260px;"></div>
+    <div class="circle" id="top4" style="top: 85px; left: 360px;"></div>
+
+    <div class="rectangle" style="top: 380px; left: 50px;"></div>
+    <div class="circle" id="bottom1" style="top: 385px; left: 60px;"></div>
+    <div class="circle" id="bottom2" style="top: 385px; left: 160px;"></div>
+    <div class="circle" id="bottom3" style="top: 385px; left: 260px;"></div>
+    <div class="circle" id="bottom4" style="top: 385px; left: 360px;"></div>
+
+    <div class="colour-square" id="red" style="top: 20px; left: 500px;"></div>
+    <div class="colour-square" id="blue" style="top: 20px; left: 550px; background-color: blue"></div>
+    <div class="colour-square" id="green" style="top: 70px; left: 500px; background-color: green"></div>
+    <div class="colour-square" id="yellow" style="top: 70px; left: 550px; background-color: yellow"></div>
+    <div class="text" style="top: 145px; left: 560px;">Selected wire colour</div>
+    <div class="colour-square" id="selected-colour" style="top: 130px; left: 500px; "></div>
+
+    <div id="clue-container">
+        <input type="text" class="clue" id="clue1" maxlength="1" style="top: 20px; left: 55px">
+        <input type="text" class="clue" id="clue2" maxlength="1" style="top: 20px; left: 155px">
+        <input type="text" class="clue" id="clue3" maxlength="1" style="top: 20px; left: 255px">
+        <input type="text" class="clue" id="clue4" maxlength="1" style="top: 20px; left: 355px">
+        <input type="text" class="clue" id="clue5" maxlength="1" style="top: 445px; left: 55px">
+        <input type="text" class="clue" id="clue6" maxlength="1" style="top: 445px; left: 155px">
+        <input type="text" class="clue" id="clue7" maxlength="1" style="top: 445px; left: 255px">
+        <input type="text" class="clue" id="clue8" maxlength="1" style="top: 445px; left: 355px">
+    </div>
+
+    <input type="text" class="level-name" id="levelName" placeholder="Level Name" style="top: 190px; left: 500px">
+
+    <button class="button" id="doneButton" onclick="getPuzzleData()" style="top: 230px; left: 500px">Input Puzzle
+        Solution</button>
+
+    <script>
+        const colourSquares = document.querySelectorAll('.colour-square');
+        const selectedColourSquare = document.getElementById('selected-colour');
+        const circles = document.querySelectorAll('.circle');
+        let defaultColour = document.getElementById('top1').style.backgroundColor;
+        let isSelected = false;
+        let selectedCircle;
+        let levelSolution = [];
+        let levelClue = "";
+
+        let wires = [{ wireNo: 'wire1', start: 'top1', end: null, wireColour: null },
+        { wireNo: 'wire2', start: 'top2', end: null, wireColour: null },
+        { wireNo: 'wire3', start: 'top3', end: null, wireColour: null },
+        { wireNo: 'wire4', start: 'top4', end: null, wireColour: null }];
+
+        //Add click events for colour select and circles
+        colourSquares.forEach(square => {
+            square.addEventListener('click', changeColour);
+        });
+
+        circles.forEach(circle => {
+            circle.addEventListener('click', selectWire);
+        });
+
+        //Change selected colour when user clicks on a colour select square
+        //Reset selected circle
+        function changeColour(square) {
+            const selectedColour = square.target.style.backgroundColor;
+            selectedColourSquare.style.backgroundColor = selectedColour;
+            if (isSelected) {
+                isSelected = false;
+                selectedCircle.style.backgroundColor = defaultColour;
+            }
+        }
+
+        //When user clicks on a circle, if not other circle is selected, highlight clicked circle in selected colour
+        //If another circle was already selected, check if selected is on the same level as the clicked
+        //If not, add the wire to wires array and draw wires
+        function selectWire(circle) {
+            let selectedColour = window.getComputedStyle(selectedColourSquare).backgroundColor;
+
+            if (isSelected) {
+                let isCircleTop = circle.srcElement.id.includes('top');
+                let isSelectedTop = selectedCircle.id.includes('top');
+                let isSameLevel = sameLevelCheck(isCircleTop, isSelectedTop);
+
+                if (isSameLevel) {
+                    selectedCircle.style.backgroundColor = defaultColour;
+                    circle.srcElement.style.backgroundColor = selectedColour;
+                    selectedCircle = circle.srcElement;
+                } else {
+                    selectedCircle.style.backgroundColor = defaultColour;
+                    if (isCircleTop) {
+                        addWire(circle.srcElement, selectedCircle, selectedColour);
+                    } else {
+                        addWire(selectedCircle, circle.srcElement, selectedColour);
+                    }
+                    drawWires();
+                    isSelected = false;
+                }
+            } else {
+                circle.srcElement.style.backgroundColor = selectedColour;
+                isSelected = true;
+                selectedCircle = circle.srcElement;
+            }
+        }
+
+        //Check if two circles are on the same level using id (i.e. top and top or bottom and bottom)
+        function sameLevelCheck(isTop1, isTop2) {
+            return !((isTop1 || isTop2) && !(isTop1 && isTop2));
+        }
+
+        //When a new wire is added to wires array, remove any wires that would conflict with new wire
+        //i.e. any wire that points to the same circle as new, or any wires that is the same colour as new 
+        function resetWire(oldWireIndex) {
+            if (oldWireIndex >= 0) {
+                oldWire = wires[oldWireIndex];
+                oldWire['end'] = null;
+                oldWire['wireColour'] = null;
+                wires[oldWireIndex] = oldWire;
+            }
+        }
+
+        //Add new wire to wire array
+        function addWire(startCircle, endCircle, selectedColour) {
+            let wireIndex;
+            let wire;
+
+            resetWire(wires.findIndex(x => x.end == endCircle.id));
+            resetWire(wires.findIndex(x => x.wireColour == selectedColour));
+
+            wireIndex = wires.findIndex(x => x.start == startCircle.id);
+            wire = wires[wireIndex];
+            wire['end'] = endCircle.id;
+            wire['wireColour'] = selectedColour;
+            wires[wireIndex] = wire;
+        }
+
+        //Remove all existing wires from page, then redraw using wires array
+        function drawWires() {
+            let existingWires = document.getElementsByClassName('wire');
+
+            while (existingWires[0]) {
+                existingWires[0].parentNode.removeChild(existingWires[0]);
+            }
+
+            wires.forEach(drawOneWire);
+        }
+
+        //Draw a wire connecting two circles
+        //If a wire passed into this function from the wires array does not have a set 'end' circle, return
+        //Some maths is required to calculate the distance between the two circles and the midpoint of the new wire
+        function drawOneWire(wire) {
+
+            if (!Boolean(wire['end'])) {
+                return;
+            }
+
+            startCircle = document.getElementById(wire['start']);
+            endCircle = document.getElementById(wire['end']);
+
+            const x1 = parseInt(startCircle.style.left) + (startCircle.offsetWidth / 2);
+            const y1 = parseInt(startCircle.style.top) + (startCircle.offsetHeight / 2);
+
+            const x2 = parseInt(endCircle.style.left) + (endCircle.offsetWidth / 2);
+            const y2 = parseInt(endCircle.style.top) + (endCircle.offsetHeight / 2);
+
+            const distance = Math.sqrt(((x1 - x2) ** 2) + ((y1 - y2) ** 2));
+
+            xMid = (x1 + x2) / 2;
+            yMid = (y1 + y2) / 2;
+
+
+            newWire = document.createElement('div');
+            newWire.classList.add('wire');
+            document.body.appendChild(newWire);
+
+            newWire.style.width = distance + 'px';
+            newWire.style.transform = `rotate(${Math.atan2(y2 - y1, x2 - x1)}rad)`;
+            newWire.style.top = yMid + 'px';
+            newWire.style.left = (xMid - distance / 2) + 'px';
+            newWire.style.border = '5px solid ' + wire['wireColour'];
+        }
+
+        //Convert RGB colour values into letters for use in parsing output
+        function RGBtoColourName(RGB) {
+            var colours = {
+                "rgb(255, 0, 0)": "r",
+                "rgb(0, 0, 255)": "b",
+                "rgb(0, 128, 0)": "g",
+                "rgb(255, 255, 0)": "y"
+            }
+
+            if (typeof colours[RGB] != 'undefined')
+                return colours[RGB];
+
+            return RGB;
+        }
+
+        //Parse level data into correct format for later use
+        //If the user has not entered a level name, add a red border to highlight that this is required
+        //If the user has not connected the 4 coloured wires, do nothing
+        //Concatenate level clues into a single string
+        function getPuzzleData() {
+            levelName = document.getElementById('levelName');
+
+            if ((wires.findIndex(x => x.end == null)) >= 0) {
+                return;
+            } else if (levelName.value == "") {
+                levelName.style.border = "2px solid red";
+                return;
+            } else {
+                let clues = document.querySelectorAll('.clue');
+                levelName.style.border = "thin solid black";
+                levelClue = "";
+                levelSolution = [];
+
+                clues.forEach(clue => {
+                    levelClue += clue.value;
+                });
+
+                wires.forEach(function (wire, i) {
+                    levelSolution[i] = [0, i, RGBtoColourName(wire['wireColour']), parseInt(wire['end'].slice(-1)) - 1];
+                });
+
+                levelData = '{' + levelName.value + ':{"levelClue":' + levelClue + ', "levelSolution":' + JSON.stringify(levelSolution) + '}}';
+
+                console.log(levelData);
+            }
+        }
+
+    </script>
+</body>
+
+</html>

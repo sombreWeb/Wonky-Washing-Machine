@@ -240,14 +240,10 @@ float findAverageResistance(int sensorNumber, int numberOfTests, boolean redOffs
 
   float sumResistance = 0;
   for (int j = 0; j < numberOfTests; j++) {
-    //sensorValues[sensorNumber] = analogRead(sensorPins[sensorNumber]);
     sensorValues[sensorNumber] = ads.readADC_SingleEnded(sensorNumber);
-    //Vouts[sensorNumber] = (Vin * sensorValues[sensorNumber]) / 1023.0;
     Vouts[sensorNumber] = (Vin / 65535.0) * sensorValues[sensorNumber];
     float resistance = Rref * (1.0 / ((Vin / Vouts[sensorNumber]) - 1.0));
     sumResistance += resistance;
-
-    //delay(10);  // Delay to allow the ADC to stabilize between readings
   }
   float averageResistance = sumResistance / numberOfTests;  // Calculate average resistance
   if (redOffsetOn) {

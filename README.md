@@ -20,7 +20,6 @@ The following tables show the pin connections for various elements used in the W
 | Potentiometer 2       | POT_PIN_2    | A2         |
 | Potentiometer 3       | POT_PIN_3    | A1         |
 | LED Data Pin          | LEDS_DATA_PIN| 23         |
-| Number of LEDs        | NUM_LEDS     | 4          |
 | Red Button Pin        | BUTTON_PIN_RED    | 31   |
 | Green Button Pin      | BUTTON_PIN_GREEN  | 29   |
 | Blue Button Pin       | BUTTON_PIN_BLUE   | 27   |
